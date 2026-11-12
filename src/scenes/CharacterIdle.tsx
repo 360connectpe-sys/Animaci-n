@@ -11,6 +11,9 @@ export type ExpressionKey = {at: number; expression: ExpressionName};
 
 // A change of expression lasts 0.3 s (9 frames at 30 fps).
 const TRANSITION_FRAMES = 9;
+const CUT_AT = 4; // frame of the change where the head swaps (eyes fully closed)
+const OUT_BLINK = [0.55, 1, 1, 1]; // old face closing its eyes
+const IN_BLINK = [1, 0.6, 0.2, 0, 0]; // new face opening its eyes
 
 type EyeSpot = {x: number; y: number; rot: number};
 
@@ -96,26 +99,20 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
   const frame = useCurrentFrame();
   const {fps, width, height, durationInFrames} = useVideoConfig();
 
-  // Expression: the new head fades in over the old one (the old stays opaque underneath, so no see-through
-  // gap), both aligned at the ears and neck. Blinks pause while the change happens.
+  // Expression change = clean cut hidden by a blink: the old face closes its eyes, the head swaps while the
+  // eyes are shut, and the new face opens them. A tiny camera push on the cut sells the move.
+  // Both heads share the same ear/neck alignment, so nothing jumps.
   const keys = [...(expressionTimeline ?? [{at: 0, expression}])].sort((a, b) => a.at - b.at);
   let idx = 0;
   keys.forEach((k, i) => {
     if (k.at <= frame) idx = i;
   });
-  const face = EXPRESSIONS[keys[idx].expression];
-  const prevFace = idx > 0 ? EXPRESSIONS[keys[idx - 1].expression] : null;
-  const rawT = prevFace ? Math.min(1, Math.max(0, (frame - keys[idx].at) / TRANSITION_FRAMES)) : 1;
-  const ramp = (a: number, b: number) => {
-    const x = Math.min(1, Math.max(0, (rawT - a) / (b - a)));
-    return x * x * (3 - 2 * x);
-  };
-  // New face comes in early (t 0.2-0.6) over the old one; the old face leaves last (t 0.6-1), so the two
-  // are only both visible for a few frames. A brief blur keeps that moment from reading as two faces.
-  const mixIn = ramp(0.2, 0.6);
-  const mixOut = 1 - ramp(0.6, 1);
-  const changing = rawT < 1;
-  const blur = changing ? 3 * Math.sin(Math.PI * rawT) : 0;
+  const since = idx > 0 ? frame - keys[idx].at : TRANSITION_FRAMES;
+  const changing = since < TRANSITION_FRAMES;
+  const beforeCut = changing && since < CUT_AT;
+  const face = EXPRESSIONS[keys[beforeCut ? idx - 1 : idx].expression];
+  const closedAmount = changing ? (beforeCut ? OUT_BLINK[since] : IN_BLINK[since - CUT_AT]) : null;
+  const push = changing ? 1 + 0.01 * Math.sin((Math.PI * since) / (TRANSITION_FRAMES - 1)) : 1;
 
   // Breathing: whole figure scales a hair taller on inhale, anchored at the feet.
   const b = breath(frame, fps, 4);
@@ -124,9 +121,9 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
   // Natural head tilt: a slow roll plus a faster, smaller one. Rotation only, around the neck base,
   // so face and neck stay aligned with the body (no independent shifts).
   const t = frame / fps;
-  const tilt = 2.4 * Math.sin(t * 1.1) + 0.5 * Math.sin(t * 2.3 + 1) + (changing ? 1.2 * Math.sin(Math.PI * rawT) : 0);
+  const tilt = 2.4 * Math.sin(t * 1.1) + 0.5 * Math.sin(t * 2.3 + 1);
 
-  const closed = changing ? 0 : blinkAmount(frame);
+  const closed = closedAmount ?? blinkAmount(frame);
 
   // Fades in/out.
   const fade = interpolate(frame, [0, 15, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {
@@ -137,7 +134,7 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
   const layer: React.CSSProperties = {position: 'absolute', left: 0, top: 0, width: FIG_W, height: FIG_H};
 
   return (
-    <AbsoluteFill style={{backgroundColor: '#18141c', opacity: fade}}>
+    <AbsoluteFill style={{backgroundColor: '#18141c', opacity: fade, transform: `scale(${push})`, transformOrigin: '50% 35%'}}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{position: 'absolute'}}>
         {scene === 'room' ? (
           <NightRoomBack frame={frame} duration={durationInFrames} />
@@ -168,19 +165,9 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
             ...layer,
             transformOrigin: `${NECK.x * SCALE}px ${NECK.y * SCALE}px`,
             transform: `rotate(${tilt}deg)`,
-            filter: blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : undefined,
           }}
         >
-          {changing && prevFace && (
-            <Img
-              src={staticFile(`assets/characters/animation-parts/head/${prevFace.head}`)}
-              style={{...layer, opacity: mixOut}}
-            />
-          )}
-          <Img
-            src={staticFile(`assets/characters/animation-parts/head/${face.head}`)}
-            style={{...layer, opacity: changing ? mixIn : 1}}
-          />
+          <Img src={staticFile(`assets/characters/animation-parts/head/${face.head}`)} style={layer} />
           <ClosedEyes amount={closed} eyes={face.eyes} />
         </div>
       </div>

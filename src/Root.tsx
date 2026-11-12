@@ -1,10 +1,19 @@
 import React from 'react';
 import {Composition} from 'remotion';
 import {Dialogue, DIALOGUE_DURATION} from './scenes/Dialogue';
+import {Pilot, PILOT_DURATION} from './scenes/Pilot';
 import {CharacterIdle, IDLE_DURATION, IDLE_SHORT_DURATION} from './scenes/CharacterIdle';
 
 export const RemotionRoot: React.FC = () => (
   <>
+  <Composition
+    id="PilotoReflexion"
+    component={Pilot}
+    durationInFrames={PILOT_DURATION}
+    fps={30}
+    width={1080}
+    height={1920}
+  />
   <Composition
     id="PersonajeHabitacion"
     component={CharacterIdle}

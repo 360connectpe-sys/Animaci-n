@@ -58,8 +58,8 @@ const EYE_H = 8;
 const BLINK_STARTS = [40, 118, 205, 214, 268];
 const BLINK_SHAPE = [0.55, 1, 1, 0.6, 0.2]; // closed amount over 5 frames
 
-const blinkAmount = (frame: number): number => {
-  for (const start of BLINK_STARTS) {
+const blinkAmount = (frame: number, starts: number[] = BLINK_STARTS): number => {
+  for (const start of starts) {
     const i = frame - start;
     if (i >= 0 && i < BLINK_SHAPE.length) return BLINK_SHAPE[i];
   }
@@ -91,11 +91,12 @@ const ClosedEyes: React.FC<{amount: number; eyes: EyeSpot[] | null}> = ({amount,
   );
 };
 
-export const CharacterIdle: React.FC<{scene?: SceneName; expression?: ExpressionName; expressionTimeline?: ExpressionKey[]}> = ({
-  scene = 'dialogue',
-  expression = 'neutral',
-  expressionTimeline,
-}) => {
+export const CharacterIdle: React.FC<{
+  scene?: SceneName;
+  expression?: ExpressionName;
+  expressionTimeline?: ExpressionKey[];
+  blinkStarts?: number[]; // frames where a normal blink begins; defaults to BLINK_STARTS
+}> = ({scene = 'dialogue', expression = 'neutral', expressionTimeline, blinkStarts}) => {
   const frame = useCurrentFrame();
   const {fps, width, height, durationInFrames} = useVideoConfig();
 
@@ -123,7 +124,7 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
   const t = frame / fps;
   const tilt = 2.4 * Math.sin(t * 1.1) + 0.5 * Math.sin(t * 2.3 + 1);
 
-  const closed = closedAmount ?? blinkAmount(frame);
+  const closed = closedAmount ?? blinkAmount(frame, blinkStarts);
 
   // Fades in/out.
   const fade = interpolate(frame, [0, 15, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {

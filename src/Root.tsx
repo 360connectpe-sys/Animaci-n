@@ -2,10 +2,22 @@ import React from 'react';
 import {Composition} from 'remotion';
 import {Dialogue, DIALOGUE_DURATION} from './scenes/Dialogue';
 import {Pilot, PILOT_DURATION} from './scenes/Pilot';
+import {EpisodeVideo} from './scenes/Episode';
+import {episode01} from './episodes/episode01';
+import {episodeSeconds} from './episodes/types';
 import {CharacterIdle, IDLE_DURATION, IDLE_SHORT_DURATION} from './scenes/CharacterIdle';
 
 export const RemotionRoot: React.FC = () => (
   <>
+  <Composition
+    id="Episodio01"
+    component={EpisodeVideo}
+    durationInFrames={Math.round(episodeSeconds(episode01) * 30)}
+    fps={30}
+    width={1080}
+    height={1920}
+    defaultProps={{episode: episode01}}
+  />
   <Composition
     id="PilotoReflexion"
     component={Pilot}

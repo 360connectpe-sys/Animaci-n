@@ -28,3 +28,9 @@ description: Conventions for 9:16 reflective 2D shorts built with Remotion, SVG 
 - Preview: `npm run studio`
 - Type-check: `npm run typecheck`
 - Render MP4: `npm run render` (output `out/dialogo.mp4`, not committed). CI: the "Render MP4" workflow.
+
+## Episodes (60 s template)
+- Config: `src/episodes/episode01.ts` (types in `src/episodes/types.ts`). Copy it for a new episode and register it in `src/Root.tsx` like `Episodio01`.
+- Each scene sets `seconds`, `backdrop` ('room' | 'street' | 'dialogue'), `expressions` (seconds), optional `camera` keys (zoom, lift), `blinks`, `narration` and `subtitles` (seconds, or word indexes when narration has `words`).
+- Renderer: `src/scenes/Episode.tsx` plays scenes back to back; each scene fades in and out.
+- The pilot (`PilotoReflexion`, `src/scenes/Pilot.tsx`) is separate and unchanged.

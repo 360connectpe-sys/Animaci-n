@@ -24,6 +24,22 @@ export const RemotionRoot: React.FC = () => (
     defaultProps={{scene: 'street' as const}}
   />
   <Composition
+    id="ExpresionesTransicion"
+    component={CharacterIdle}
+    durationInFrames={240}
+    fps={30}
+    width={1080}
+    height={1920}
+    defaultProps={{
+      expressionTimeline: [
+        {at: 0, expression: 'neutral' as const},
+        {at: 50, expression: 'sad' as const},
+        {at: 110, expression: 'thoughtful' as const},
+        {at: 170, expression: 'neutral' as const},
+      ],
+    }}
+  />
+  <Composition
     id="ExpresionTriste"
     component={CharacterIdle}
     durationInFrames={IDLE_SHORT_DURATION}

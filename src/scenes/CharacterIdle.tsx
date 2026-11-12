@@ -7,6 +7,10 @@ import {SunsetStreetBack, SunsetStreetFront} from './backdrops/SunsetStreet';
 
 export type SceneName = 'dialogue' | 'room' | 'street';
 export type ExpressionName = 'neutral' | 'sad' | 'thoughtful';
+export type ExpressionKey = {at: number; expression: ExpressionName};
+
+// A change of expression lasts 0.3 s (9 frames at 30 fps).
+const TRANSITION_FRAMES = 9;
 
 type EyeSpot = {x: number; y: number; rot: number};
 
@@ -84,13 +88,34 @@ const ClosedEyes: React.FC<{amount: number; eyes: EyeSpot[] | null}> = ({amount,
   );
 };
 
-export const CharacterIdle: React.FC<{scene?: SceneName; expression?: ExpressionName}> = ({
+export const CharacterIdle: React.FC<{scene?: SceneName; expression?: ExpressionName; expressionTimeline?: ExpressionKey[]}> = ({
   scene = 'dialogue',
   expression = 'neutral',
+  expressionTimeline,
 }) => {
-  const face = EXPRESSIONS[expression];
   const frame = useCurrentFrame();
   const {fps, width, height, durationInFrames} = useVideoConfig();
+
+  // Expression: the new head fades in over the old one (the old stays opaque underneath, so no see-through
+  // gap), both aligned at the ears and neck. Blinks pause while the change happens.
+  const keys = [...(expressionTimeline ?? [{at: 0, expression}])].sort((a, b) => a.at - b.at);
+  let idx = 0;
+  keys.forEach((k, i) => {
+    if (k.at <= frame) idx = i;
+  });
+  const face = EXPRESSIONS[keys[idx].expression];
+  const prevFace = idx > 0 ? EXPRESSIONS[keys[idx - 1].expression] : null;
+  const rawT = prevFace ? Math.min(1, Math.max(0, (frame - keys[idx].at) / TRANSITION_FRAMES)) : 1;
+  const ramp = (a: number, b: number) => {
+    const x = Math.min(1, Math.max(0, (rawT - a) / (b - a)));
+    return x * x * (3 - 2 * x);
+  };
+  // New face comes in early (t 0.2-0.6) over the old one; the old face leaves last (t 0.6-1), so the two
+  // are only both visible for a few frames. A brief blur keeps that moment from reading as two faces.
+  const mixIn = ramp(0.2, 0.6);
+  const mixOut = 1 - ramp(0.6, 1);
+  const changing = rawT < 1;
+  const blur = changing ? 3 * Math.sin(Math.PI * rawT) : 0;
 
   // Breathing: whole figure scales a hair taller on inhale, anchored at the feet.
   const b = breath(frame, fps, 4);
@@ -99,9 +124,9 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
   // Natural head tilt: a slow roll plus a faster, smaller one. Rotation only, around the neck base,
   // so face and neck stay aligned with the body (no independent shifts).
   const t = frame / fps;
-  const tilt = 2.4 * Math.sin(t * 1.1) + 0.5 * Math.sin(t * 2.3 + 1);
+  const tilt = 2.4 * Math.sin(t * 1.1) + 0.5 * Math.sin(t * 2.3 + 1) + (changing ? 1.2 * Math.sin(Math.PI * rawT) : 0);
 
-  const closed = blinkAmount(frame);
+  const closed = changing ? 0 : blinkAmount(frame);
 
   // Fades in/out.
   const fade = interpolate(frame, [0, 15, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {
@@ -143,9 +168,19 @@ export const CharacterIdle: React.FC<{scene?: SceneName; expression?: Expression
             ...layer,
             transformOrigin: `${NECK.x * SCALE}px ${NECK.y * SCALE}px`,
             transform: `rotate(${tilt}deg)`,
+            filter: blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : undefined,
           }}
         >
-          <Img src={staticFile(`assets/characters/animation-parts/head/${face.head}`)} style={layer} />
+          {changing && prevFace && (
+            <Img
+              src={staticFile(`assets/characters/animation-parts/head/${prevFace.head}`)}
+              style={{...layer, opacity: mixOut}}
+            />
+          )}
+          <Img
+            src={staticFile(`assets/characters/animation-parts/head/${face.head}`)}
+            style={{...layer, opacity: changing ? mixIn : 1}}
+          />
           <ClosedEyes amount={closed} eyes={face.eyes} />
         </div>
       </div>

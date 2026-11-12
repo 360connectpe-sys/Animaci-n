@@ -6,6 +6,29 @@ import {NightRoomBack, NightRoomFront} from './backdrops/NightRoom';
 import {SunsetStreetBack, SunsetStreetFront} from './backdrops/SunsetStreet';
 
 export type SceneName = 'dialogue' | 'room' | 'street';
+export type ExpressionName = 'neutral' | 'sad' | 'thoughtful';
+
+type EyeSpot = {x: number; y: number; rot: number};
+
+// Head layer per expression (same canvas, same neck seam) and where the closed-eye overlay goes.
+// The sad face already has closed eyes, so it does not blink.
+const EXPRESSIONS: Record<ExpressionName, {head: string; eyes: EyeSpot[] | null}> = {
+  neutral: {
+    head: 'head-front-neutral.png',
+    eyes: [
+      {x: 112.5, y: 58, rot: 0},
+      {x: 138.75, y: 58, rot: 0},
+    ],
+  },
+  sad: {head: 'head-front-sad.png', eyes: null},
+  thoughtful: {
+    head: 'head-front-thoughtful.png',
+    eyes: [
+      {x: 121, y: 44.6, rot: 6.8},
+      {x: 149.4, y: 48, rot: 6.8},
+    ],
+  },
+};
 
 // 10 seconds at 30 fps. Layers come from tools/assets/split_character.py (same 252x680 canvas).
 export const IDLE_DURATION = 300;
@@ -20,8 +43,6 @@ const FEET_Y = 1700; // where the shoes touch the floor in the 1080x1920 frame
 
 // Head pivot (neck) and eye centers, in layer canvas coordinates.
 const NECK = {x: 123, y: 112};
-const EYES = [112.5, 138.75];
-const EYE_Y = 58;
 // Closed-eye overlay (right eye from the sheet; the left eye is the same image mirrored).
 const EYE_W = 15; // canvas px; the asset is 60x32 (4x)
 const EYE_H = 8;
@@ -38,23 +59,24 @@ const blinkAmount = (frame: number): number => {
   return 0;
 };
 
-const ClosedEyes: React.FC<{amount: number}> = ({amount}) => {
-  if (amount <= 0) return null;
+const ClosedEyes: React.FC<{amount: number; eyes: EyeSpot[] | null}> = ({amount, eyes}) => {
+  if (amount <= 0 || !eyes) return null;
   const src = staticFile('assets/characters/animation-parts/eyes/eye-closed-right.png');
   return (
     <>
-      {EYES.map((x, i) => (
+      {eyes.map((e, i) => (
         <Img
-          key={x}
+          key={i}
           src={src}
           style={{
             position: 'absolute',
-            left: (x - EYE_W / 2) * SCALE,
-            top: (EYE_Y - EYE_H / 2) * SCALE,
+            left: (e.x - EYE_W / 2) * SCALE,
+            top: (e.y - EYE_H / 2) * SCALE,
             width: EYE_W * SCALE,
             height: EYE_H * SCALE,
             opacity: amount,
-            transform: i === 0 ? 'scaleX(-1)' : undefined, // EYES[0] is the left eye in the image
+            // eyes[0] is the left eye in the image: mirror the right-eye asset for it.
+            transform: `rotate(${e.rot}deg)${i === 0 ? ' scaleX(-1)' : ''}`,
           }}
         />
       ))}
@@ -62,7 +84,11 @@ const ClosedEyes: React.FC<{amount: number}> = ({amount}) => {
   );
 };
 
-export const CharacterIdle: React.FC<{scene?: SceneName}> = ({scene = 'dialogue'}) => {
+export const CharacterIdle: React.FC<{scene?: SceneName; expression?: ExpressionName}> = ({
+  scene = 'dialogue',
+  expression = 'neutral',
+}) => {
+  const face = EXPRESSIONS[expression];
   const frame = useCurrentFrame();
   const {fps, width, height, durationInFrames} = useVideoConfig();
 
@@ -119,8 +145,8 @@ export const CharacterIdle: React.FC<{scene?: SceneName}> = ({scene = 'dialogue'
             transform: `rotate(${tilt}deg)`,
           }}
         >
-          <Img src={staticFile('assets/characters/animation-parts/head/head-front-neutral.png')} style={layer} />
-          <ClosedEyes amount={closed} />
+          <Img src={staticFile(`assets/characters/animation-parts/head/${face.head}`)} style={layer} />
+          <ClosedEyes amount={closed} eyes={face.eyes} />
         </div>
       </div>
       {scene !== 'dialogue' && (

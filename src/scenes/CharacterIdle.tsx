@@ -56,12 +56,12 @@ export const CharacterIdle: React.FC<{blinking?: boolean}> = ({blinking = true})
 
   // Breathing: whole figure scales a hair taller on inhale, anchored at the feet.
   const b = breath(frame, fps, 4);
-  const chest = 1 + 0.006 * b;
+  const chest = 1 + 0.012 * b;
 
-  // Soft head motion: slow, uneven sines so it never loops mechanically.
-  const tilt = 1.7 * Math.sin((frame / fps) * 1.25) + 0.6 * Math.sin((frame / fps) * 2.3 + 1);
-  const shiftX = 1.2 * Math.sin((frame / fps) * 0.7 + 0.5);
-  const shiftY = 0.8 * Math.sin((frame / fps) * 1.1) + 0.6 * b;
+  // Natural head tilt: a slow roll plus a faster, smaller one. Rotation only, around the neck base,
+  // so face and neck stay aligned with the body (no independent shifts).
+  const t = frame / fps;
+  const tilt = 2.4 * Math.sin(t * 1.1) + 0.5 * Math.sin(t * 2.3 + 1);
 
   // Blink: eyelids cover the eyes for a few frames every ~3.5 s.
   const cover = blinking ? Math.min(1, (1 - blink(frame, 105, 40)) / 0.85) : 0;
@@ -97,7 +97,7 @@ export const CharacterIdle: React.FC<{blinking?: boolean}> = ({blinking = true})
           style={{
             ...layer,
             transformOrigin: `${NECK.x * SCALE}px ${NECK.y * SCALE}px`,
-            transform: `translate(${shiftX}px, ${shiftY}px) rotate(${tilt}deg)`,
+            transform: `rotate(${tilt}deg)`,
           }}
         >
           <Img src={staticFile('assets/characters/animation-parts/head/head-front-neutral.png')} style={layer} />

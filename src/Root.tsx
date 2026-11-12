@@ -6,6 +6,24 @@ import {CharacterIdle, IDLE_DURATION, IDLE_SHORT_DURATION} from './scenes/Charac
 export const RemotionRoot: React.FC = () => (
   <>
   <Composition
+    id="PersonajeHabitacion"
+    component={CharacterIdle}
+    durationInFrames={IDLE_SHORT_DURATION}
+    fps={30}
+    width={1080}
+    height={1920}
+    defaultProps={{scene: 'room' as const}}
+  />
+  <Composition
+    id="PersonajeCalle"
+    component={CharacterIdle}
+    durationInFrames={IDLE_SHORT_DURATION}
+    fps={30}
+    width={1080}
+    height={1920}
+    defaultProps={{scene: 'street' as const}}
+  />
+  <Composition
     id="PersonajeRespira5s"
     component={CharacterIdle}
     durationInFrames={IDLE_SHORT_DURATION}

@@ -2,6 +2,10 @@ import React from 'react';
 import {AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {breath} from '../lib/anim';
 import {Background} from './Dialogue';
+import {NightRoomBack, NightRoomFront} from './backdrops/NightRoom';
+import {SunsetStreetBack, SunsetStreetFront} from './backdrops/SunsetStreet';
+
+export type SceneName = 'dialogue' | 'room' | 'street';
 
 // 10 seconds at 30 fps. Layers come from tools/assets/split_character.py (same 252x680 canvas).
 export const IDLE_DURATION = 300;
@@ -58,7 +62,7 @@ const ClosedEyes: React.FC<{amount: number}> = ({amount}) => {
   );
 };
 
-export const CharacterIdle: React.FC = () => {
+export const CharacterIdle: React.FC<{scene?: SceneName}> = ({scene = 'dialogue'}) => {
   const frame = useCurrentFrame();
   const {fps, width, height, durationInFrames} = useVideoConfig();
 
@@ -84,8 +88,16 @@ export const CharacterIdle: React.FC = () => {
   return (
     <AbsoluteFill style={{backgroundColor: '#18141c', opacity: fade}}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{position: 'absolute'}}>
-        <Background frame={frame} />
-        <rect x={0} y={0} width={width} height={height} fill="url(#vignette)" />
+        {scene === 'room' ? (
+          <NightRoomBack frame={frame} duration={durationInFrames} />
+        ) : scene === 'street' ? (
+          <SunsetStreetBack frame={frame} duration={durationInFrames} />
+        ) : (
+          <>
+            <Background frame={frame} />
+            <rect x={0} y={0} width={width} height={height} fill="url(#vignette)" />
+          </>
+        )}
       </svg>
 
       <div
@@ -111,6 +123,15 @@ export const CharacterIdle: React.FC = () => {
           <ClosedEyes amount={closed} />
         </div>
       </div>
+      {scene !== 'dialogue' && (
+        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{position: 'absolute'}}>
+          {scene === 'room' ? (
+            <NightRoomFront frame={frame} duration={durationInFrames} />
+          ) : (
+            <SunsetStreetFront frame={frame} duration={durationInFrames} />
+          )}
+        </svg>
+      )}
     </AbsoluteFill>
   );
 };

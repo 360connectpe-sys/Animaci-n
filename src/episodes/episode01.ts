@@ -80,24 +80,25 @@ export const episode01: Episode = {
       ],
     },
     {
-      // Acceptance: he looks at you, at peace.
-      id: '4-suficiente',
+      // Closing question: he turns to you and holds your gaze while the camera keeps closing in.
+      id: '4-orgullo',
       seconds: 15,
       backdrop: 'street',
-      narration: {audio: 'audio/ep01_escena4.mp3', startAt: 2, words: w4},
+      narration: {audio: 'audio/ep01_escena4.mp3', startAt: 4, words: w4},
       subtitles: [
-        {text: 'Pero también vería a alguien que siguió adelante.', fromWord: 0, toWord: 7, hold: 0.8},
-        {text: 'Y eso… ya es suficiente.', fromWord: 8, toWord: 12, hold: 4},
+        {text: '¿Tu yo de hace cinco años…', fromWord: 0, toWord: 5, hold: 0.2},
+        {text: '…estaría orgulloso de quien eres hoy?', fromWord: 6, toWord: 11, hold: 5},
       ],
       expressions: [
         {at: 0, expression: 'thoughtful'},
-        {at: 6.0, expression: 'neutral'},
+        {at: 5.9, expression: 'neutral'},
       ],
-      blinks: [1.5, 4.5, 10.0, 12.8],
+      blinks: [1.5, 4.5, 11.5],
       camera: [
         {at: 0, zoom: 1.0},
-        {at: 6.0, zoom: 1.2, lift: 50},
-        {at: 15, zoom: 1.45, lift: 110},
+        {at: 4, zoom: 1.15, lift: 30},
+        {at: 9, zoom: 1.5, lift: 100},
+        {at: 15, zoom: 1.65, lift: 120},
       ],
     },
   ],

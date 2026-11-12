@@ -50,7 +50,7 @@ const kf = (frame: number, keys: [number, number][]): number =>
 const mouthFor = (frame: number, [a, b]: [number, number]): number =>
   frame >= a && frame <= b ? 0.3 + 0.4 * Math.abs(Math.sin(frame * 0.55)) : 0;
 
-const Background: React.FC<{frame: number}> = ({frame}) => {
+export const Background: React.FC<{frame: number}> = ({frame}) => {
   const bgX = kf(frame, [
     [0, 30],
     [600, -30],

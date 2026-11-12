@@ -1,0 +1,35 @@
+{
+  "name": "animacion-reflexiva",
+  "version": "1.0.0",
+  "description": "2D reflective shorts in Remotion (9:16)",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts ReflexionDialogo out/dialogo.mp4",
+    "tts": "python3 tools/tts/generate.py",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/360connectpe-sys/Animaci-n.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/360connectpe-sys/Animaci-n/issues"
+  },
+  "homepage": "https://github.com/360connectpe-sys/Animaci-n#readme",
+  "dependencies": {
+    "@remotion/cli": "^4.0.543",
+    "@remotion/player": "^4.0.543",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.543"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "typescript": "^7.0.2"
+  },
+  "private": true
+}

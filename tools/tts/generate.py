@@ -32,6 +32,10 @@ LINES = [
         "-12%",
         True,
     ),
+    ("ep01_escena1", "es-PE-AlexNeural", "¿Qué pensaría tu yo de hace cinco años... si te viera hoy?", "-15%", True),
+    ("ep01_escena2", "es-PE-AlexNeural", "Quizás se sorprendería de lo lejos que llegaste. O de todo lo que dejaste en el camino.", "-15%", True),
+    ("ep01_escena3", "es-PE-AlexNeural", "Tal vez te preguntaría por esos sueños... y tú no sabrías qué responder.", "-15%", True),
+    ("ep01_escena4", "es-PE-AlexNeural", "Pero también vería a alguien que siguió adelante. Y eso... ya es suficiente.", "-15%", True),
 ]
 
 

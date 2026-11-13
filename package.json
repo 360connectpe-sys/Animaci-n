@@ -6,7 +6,9 @@
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts ReflexionDialogo out/dialogo.mp4",
     "tts": "python3 tools/tts/generate.py",
-    "typecheck": "tsc --noEmit -p ."
+    "typecheck": "tsc --noEmit -p .",
+    "paper:studio": "remotion studio src/papercut/index.ts",
+    "paper:render": "remotion render src/papercut/index.ts PaperWalkTest out/paper-walk-test.mp4"
   },
   "repository": {
     "type": "git",

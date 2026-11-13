@@ -213,8 +213,8 @@ export const EpisodeView: React.FC<{ep: EpisodeDef}> = ({ep}) => {
       </svg>
 
       {/* sound */}
-      <Audio src={staticFile('audio/papercut/rain.mp3')} loop volume={(f) => interpolate(f, [0, 30], [0, 0.25], {extrapolateRight: 'clamp'})} />
-      <Audio src={staticFile('audio/papercut/rain_heavy.mp3')} loop volume={(f) => track(f / FPS, ep.heavyRain)} />
+      <Audio src={staticFile('audio/papercut/rain.mp3')} loop volume={0} />
+      <Audio src={staticFile('audio/papercut/rain_heavy.mp3')} loop volume={0} />
       <Audio src={staticFile('audio/papercut/music.mp3')} volume={(f) => track(f / FPS, ep.music)} />
       {gy.steps.map((f) => (
         <Sequence key={`st${f}`} from={f} durationInFrames={12}>

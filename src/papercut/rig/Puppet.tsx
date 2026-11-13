@@ -24,8 +24,9 @@ export type Look = HeadLook & {
 export type Pose = {
   x: number;
   y: number;
-  facing: 1 | -1;
+  facing: number; // +1 right, -1 left; values in between squash the puppet while it turns around
   scale: number;
+  opacity?: number;
   lean: number;
   tilt: number;
   breath: number; // -1..1
@@ -196,7 +197,7 @@ export const Puppet: React.FC<{uid: string; look: Look; pose: Pose}> = ({uid, lo
   const p = pose;
   const torso = `rotate(${p.lean}) scale(1 ${1 + 0.012 * p.breath})`;
   return (
-    <g transform={`translate(${p.x} ${p.y}) scale(${p.facing * p.scale} ${p.scale})`}>
+    <g transform={`translate(${p.x} ${p.y}) scale(${p.facing * p.scale} ${p.scale})`} opacity={p.opacity ?? 1}>
       {/* far side */}
       <g transform={torso}>
         <Arm at={SH_B} a={p.armB} look={look} f={BACK} />

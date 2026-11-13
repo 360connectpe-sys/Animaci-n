@@ -95,8 +95,8 @@ export const LampLight: React.FC<{frame: number}> = ({frame}) => {
 };
 
 /** Bus shelter (back panel, posts, roof, sign) and bench. */
-export const Shelter: React.FC = () => (
-  <g>
+export const Shelter: React.FC<{dx?: number}> = ({dx = 0}) => (
+  <g transform={`translate(${dx} 0)`}>
     <rect x={500} y={690} width={540} height={740} fill="#244a54" opacity={0.75} filter="url(#paperBg)" />
     <rect x={520} y={720} width={500} height={6} fill="#3e6670" opacity={0.6} />
     {[488, 1040].map((x) => (
@@ -113,12 +113,12 @@ export const Shelter: React.FC = () => (
   </g>
 );
 
-export const Bench: React.FC = () => (
-  <g>
-    <rect x={560} y={SEAT_Y - 92} width={440} height={30} rx={4} fill="#3b3027" filter="url(#paper)" />
-    <rect x={560} y={SEAT_Y - 48} width={440} height={26} rx={4} fill="#43362b" filter="url(#paper)" />
-    <rect x={550} y={SEAT_Y} width={460} height={24} rx={4} fill="#4a3c2f" filter="url(#paper)" />
-    {[590, 970].map((x) => (
+export const Bench: React.FC<{dx?: number; extra?: number}> = ({dx = 0, extra = 0}) => (
+  <g transform={`translate(${dx} 0)`}>
+    <rect x={560} y={SEAT_Y - 92} width={440 + extra} height={30} rx={4} fill="#3b3027" filter="url(#paper)" />
+    <rect x={560} y={SEAT_Y - 48} width={440 + extra} height={26} rx={4} fill="#43362b" filter="url(#paper)" />
+    <rect x={550} y={SEAT_Y} width={460 + extra} height={24} rx={4} fill="#4a3c2f" filter="url(#paper)" />
+    {[590, 970 + extra].map((x) => (
       <rect key={x} x={x - 8} y={SEAT_Y + 20} width={16} height={GROUND - SEAT_Y - 16} fill="#14100c" filter="url(#paper)" />
     ))}
   </g>

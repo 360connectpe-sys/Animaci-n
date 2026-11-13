@@ -8,7 +8,9 @@
     "tts": "python3 tools/tts/generate.py",
     "typecheck": "tsc --noEmit -p .",
     "paper:studio": "remotion studio src/papercut/index.ts",
-    "paper:render": "remotion render src/papercut/index.ts PaperWalkTest out/paper-walk-test.mp4"
+    "paper:render": "remotion render src/papercut/index.ts PaperWalkTest out/paper-walk-test.mp4",
+    "paper:render:ep01": "remotion render src/papercut/index.ts PaperEp01 out/paper-ep01.mp4",
+    "paper:audio": "python3 tools/audio/make_ambience.py"
   },
   "repository": {
     "type": "git",

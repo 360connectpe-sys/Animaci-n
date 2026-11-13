@@ -1,5 +1,5 @@
 import type {Limb3} from './Puppet';
-import {legReach} from './Puppet';
+import {FOOT_H, SHIN, THIGH, legReach} from './Puppet';
 
 /** Leg and arm angles for a walk cycle at phase p; amp 0..1 scales the stride (0 = standing). */
 export const walkCycle = (p: number, amp: number) => {
@@ -37,3 +37,22 @@ export const blinkAt = (frame: number, starts: number[]) => {
   }
   return 0;
 };
+
+const R2D = 180 / Math.PI;
+
+/**
+ * Two-bone leg IK: angles that put the ankle on a target point (scene px). Knee bends backward.
+ * `facing` is +1/-1; the result uses the puppet's forward-positive convention.
+ */
+export const legIK = (hipX: number, hipY: number, ankleX: number, ankleY: number, facing: number): Limb3 => {
+  const dx = (ankleX - hipX) * Math.sign(facing || 1);
+  const dy = ankleY - hipY;
+  const d = Math.min(Math.hypot(dx, dy), THIGH + SHIN - 0.5);
+  const base = Math.atan2(dx, dy) * R2D;
+  const c = (a: number) => Math.min(1, Math.max(-1, a));
+  const a1 = Math.acos(c((THIGH * THIGH + d * d - SHIN * SHIN) / (2 * THIGH * d))) * R2D;
+  const inner = Math.acos(c((THIGH * THIGH + SHIN * SHIN - d * d) / (2 * THIGH * SHIN))) * R2D;
+  return [base + a1, 180 - inner, 0];
+};
+
+export const ANKLE_ABOVE_GROUND = FOOT_H;

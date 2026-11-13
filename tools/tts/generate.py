@@ -36,11 +36,11 @@ LINES = [
     ("ep01_escena2", "es-PE-AlexNeural", "Quizás se sorprendería de lo lejos que llegaste. O de todo lo que dejaste en el camino.", "-15%", True),
     ("ep01_escena3", "es-PE-AlexNeural", "Tal vez te preguntaría por esos sueños... y tú no sabrías qué responder.", "-15%", True),
     ("ep01_escena4", "es-PE-AlexNeural", "¿Tu yo de hace cinco años... estaría orgulloso de quien eres hoy?", "-15%", True),
-    # Paper Cut episode 01: same Peruvian voice for both ages; the young self is a bit higher and quicker.
-    ("pc_e1_joven_01", "es-PE-AlexNeural", "Oye... ¿tú eres yo?", "-5%", True, "+12Hz"),
-    ("pc_e1_adulto_01", "es-PE-AlexNeural", "Sí.", "-15%", True, "-8Hz"),
-    ("pc_e1_joven_02", "es-PE-AlexNeural", "¿Del futuro?", "-5%", True, "+12Hz"),
-    ("pc_e1_adulto_02", "es-PE-AlexNeural", "De cinco años después.", "-15%", True, "-8Hz"),
+    # Paper Cut episode 01: same voice (Florian, multilingual) for both ages; the young self is higher and quicker.
+    ("pc_e1_joven_01", "de-DE-FlorianMultilingualNeural", "Oye... ¿tú eres yo?", "-4%", True, "+8Hz"),
+    ("pc_e1_adulto_01", "de-DE-FlorianMultilingualNeural", "Sí.", "-12%", True, "-6Hz"),
+    ("pc_e1_joven_02", "de-DE-FlorianMultilingualNeural", "¿Del futuro?", "-4%", True, "+8Hz"),
+    ("pc_e1_adulto_02", "de-DE-FlorianMultilingualNeural", "De cinco años después.", "-12%", True, "-6Hz"),
 ]
 
 

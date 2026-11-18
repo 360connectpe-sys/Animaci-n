@@ -11,10 +11,12 @@ if os.environ.get("CA_BUNDLE"):
 OUT = Path(__file__).resolve().parents[2] / "public" / "pandero" / "voz"
 VOICE = "es-PE-AlexNeural"
 LINES = {
-    "v1": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero. Hoy te voy a explicar cómo funciona Pandero Ya y qué pasos debes seguir para llevarte tu auto nuevo.",
-    "v2": "Tienes dos opciones. Puedes adelantar cuotas hasta completar veinticuatro, o pagar una cuota al mes y completarlas en veinticuatro meses.",
-    "v3": "Cuando completas las veinticuatro cuotas y cumples los requisitos del plan, puedes iniciar los trámites de entrega. Una vez que termines esos trámites, podrás llevarte tu auto y seguir pagando las cuotas que te quedan.",
-    "v4": "¿Ya sabes qué auto te gustaría manejar? Escríbeme por WhatsApp y te ayudo a cotizarlo.",
+    "w1": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero. ¿Te imaginas estrenar un Kia Soluto con cuotas desde doscientos cincuenta y nueve dólares al mes? Te explico cómo funciona Pandero Ya.",
+    "w1_sin_precio": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero. ¿Te gustaría saber cómo llevarte tu auto nuevo con Pandero Ya? Te lo explico.",
+    "w2": "Tienes dos caminos. Puedes pagar una cuota al mes y completar las veinticuatro en dos años. O, si quieres llegar antes, puedes adelantar cuotas.",
+    "w3": "Y hay algo más. En los meses uno, cinco, diez, quince y veinte de tu grupo, puedes participar en un sorteo. Si sales elegido, empiezas antes los trámites para llevarte tu auto.",
+    "w4": "Si no sales elegido, al completar las veinticuatro cuotas y cumplir los requisitos del programa, inicias los trámites para llevarte tu auto. Y después de recibirlo, sigues pagando las cuotas que te quedan.",
+    "w5": "¿Qué modelo tienes en mente? Escríbeme por WhatsApp y te ayudo a cotizarlo.",
 }
 
 async def main():

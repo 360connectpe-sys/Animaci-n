@@ -113,9 +113,9 @@ const Calendar24: React.FC<{filled: number; label: string; color?: string; top?:
           style={{
             height: 72,
             borderRadius: 14,
-            background: is24 ? GOLD : done ? color : '#fff',
+            background: is24 || sp > 0.3 ? GOLD : done ? color : '#fff',
             border: `3px solid ${is24 ? GOLD : sp > 0.05 ? GOLD : done ? color : '#c9d5ea'}`,
-            color: is24 ? NAVY : done ? '#fff' : '#33466b',
+            color: is24 || sp > 0.3 ? NAVY : done ? '#fff' : '#33466b',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -255,11 +255,14 @@ export const PanderoCommercial: React.FC = () => {
   const firstDone = lin(s, S.s4.start + 0.3, S.s4.start + 1.6, 0, 24);
   const restOn = prog(s, W('s4', 12) - 0.1, W('s4', 13) + 0.2);
   const count36 = Math.round(lin(s, W('s4', 13), W('s4', 17, 'end'), 0, 36));
-  // scene 6: discreet draw sparkles (no specific months)
+  // scene 6: draw months 1, 5, 10, 15 and 20 light up one after another
+  const DRAW_MONTHS = [1, 5, 10, 15, 20];
   const drawOn = prog(s, W('s6', 15) - 0.2, W('s6', 15) + 0.4);
   const sparkle = (n: number) => {
-    const ph = (s * 1.3 + n * 0.61) % 3;
-    return drawOn * (ph < 0.6 ? Math.sin((ph / 0.6) * Math.PI) : 0) * ([3, 7, 11, 16, 19].includes(n) ? 1 : 0.35);
+    const i = DRAW_MONTHS.indexOf(n);
+    if (i < 0) return 0;
+    const lit = prog(s, W('s6', 3) + i * 0.45, W('s6', 3) + i * 0.45 + 0.3);
+    return lit * (0.75 + 0.25 * Math.sin(s * 5 + i)) + drawOn * 0;
   };
 
   return (
@@ -383,8 +386,8 @@ export const PanderoCommercial: React.FC = () => {
             <Headline p={prog(s, W('s6', 3) - 0.3, W('s6', 3) + 0.4)} top={140} text="OPORTUNIDADES ADICIONALES DE ADJUDICACIÓN" size={50} />
             <div style={{transform: `translateY(${(1 - sp(S.s6.start + 0.2)) * 1200}px)`}}>
               <Phone title="Sorteos del programa" top={330}>
-                <div style={{position: 'absolute', top: 106, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 800, fontSize: 24, color: '#33466b'}}>Durante los primeros 24 meses</div>
-                <Calendar24 filled={0} label="Mes" top={160} sparkle={sparkle} mark24={prog(s, W('s6', 25), W('s6', 26))} />
+                <div style={{position: 'absolute', top: 104, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 25, color: RED}}>Sorteos: meses 1, 5, 10, 15 y 20</div>
+                <Calendar24 filled={0} label="Mes" top={150} sparkle={sparkle} mark24={prog(s, W('s6', 25), W('s6', 26))} />
                 <div style={{position: 'absolute', bottom: 22, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 800, fontSize: 20, color: '#5a6b8c'}}>Posibilidad sujeta a sorteo. No garantizada.</div>
               </Phone>
             </div>

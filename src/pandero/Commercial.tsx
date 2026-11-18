@@ -218,7 +218,7 @@ export const PanderoCommercial: React.FC = () => {
 
   // presenter
   const m = mouthAt(s);
-  const blink = [2.2, 6.1, 10.4, 14.0, 18.3, 22.9, 26.1, 31.0, 36.4, 41.5, 46.2, 50.8, 55.6, 60.2, 64.5, 68.8, 73.1, 77.6, 81.9].some((b) => s >= b && s < b + 0.13) ? 1 : 0;
+  const blink = [2.2, 6.1, 10.4, 14.0, 18.3, 22.9, 26.1, 31.0, 36.4, 41.5, 46.2, 50.8, 55.6, 60.2, 64.5, 68.8, 73.1, 77.6, 81.9, 85.6].some((b) => s >= b && s < b + 0.13) ? 1 : 0;
   const point = Math.max(
     prog(s, W('s2', 3), W('s2', 4)) * (1 - prog(s, W('s2', 20), W('s2', 21))),
     prog(s, W('s4', 11), W('s4', 12)) * (1 - prog(s, W('s4', 17, 'end'), W('s4', 18))),
@@ -261,7 +261,8 @@ export const PanderoCommercial: React.FC = () => {
   const sparkle = (n: number) => {
     const i = DRAW_MONTHS.indexOf(n);
     if (i < 0) return 0;
-    const lit = prog(s, W('s6', 3) + i * 0.45, W('s6', 3) + i * 0.45 + 0.3);
+    const w = [21, 22, 23, 24, 26][i];
+    const lit = prog(s, W('s6', w) - 0.05, W('s6', w) + 0.25);
     return lit * (0.75 + 0.25 * Math.sin(s * 5 + i)) + drawOn * 0;
   };
 
@@ -387,7 +388,7 @@ export const PanderoCommercial: React.FC = () => {
             <div style={{transform: `translateY(${(1 - sp(S.s6.start + 0.2)) * 1200}px)`}}>
               <Phone title="Sorteos del programa" top={330}>
                 <div style={{position: 'absolute', top: 104, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 25, color: RED}}>Sorteos: meses 1, 5, 10, 15 y 20</div>
-                <Calendar24 filled={0} label="Mes" top={150} sparkle={sparkle} mark24={prog(s, W('s6', 25), W('s6', 26))} />
+                <Calendar24 filled={0} label="Mes" top={150} sparkle={sparkle} mark24={prog(s, W('s6', 34), W('s6', 35))} />
                 <div style={{position: 'absolute', bottom: 22, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 800, fontSize: 20, color: '#5a6b8c'}}>Posibilidad sujeta a sorteo. No garantizada.</div>
               </Phone>
             </div>

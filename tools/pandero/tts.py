@@ -16,13 +16,16 @@ LINES = {
     "x3": "O, si lo prefieres, puedes pagar tus cuotas mensualmente y esperar hasta el mes veinticuatro para acceder a la adjudicación de tu vehículo, según las condiciones del programa.",
     "x4": "Y recuerda algo importante: después de recibir tu vehículo, deberás continuar pagando las treinta y seis cuotas restantes, de acuerdo con las condiciones de tu contrato.",
     "x5": "Durante todo este proceso contarás con mi asesoría para conocer los requisitos, preparar tu documentación y realizar los trámites necesarios para adquirir tu auto nuevo.",
-    "x6": "¡Y algo más! Durante ese periodo también tienes la posibilidad de salir adjudicado mediante los sorteos del programa y acceder a tu vehículo antes del mes veinticuatro.",
+    "x6": "¡Y algo más! Durante ese periodo también tienes la posibilidad de salir adjudicado mediante los sorteos del programa, en los meses uno, cinco, diez, quince y veinte, y acceder a tu vehículo antes del mes veinticuatro.",
     "x7": "¡Haz realidad el sueño de estrenar tu auto nuevo! Soy Daniel Domínguez, asesor vehicular de Pandero Auto. Escríbeme y conoce todas tus opciones.",
 }
 
 async def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    only = set(sys.argv[1:])
     for name, text in LINES.items():
+        if only and name not in only:
+            continue
         com = edge_tts.Communicate(text, VOICE, rate="+0%", boundary="WordBoundary")
         sub = edge_tts.SubMaker(); words = []
         with open(OUT / f"{name}.mp3", "wb") as f:

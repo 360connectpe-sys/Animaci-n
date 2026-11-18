@@ -25,8 +25,8 @@ export const CONFIG = {
     s3: {start: 24.5, end: 35.7, voiceAt: 24.7}, // paga mes a mes hasta el mes 24
     s4: {start: 35.7, end: 47.0, voiceAt: 35.9}, // las 36 cuotas restantes
     s5: {start: 47.0, end: 58.4, voiceAt: 47.2}, // trámite de adquisición
-    s6: {start: 58.4, end: 70.3, voiceAt: 58.6}, // sorteos como posibilidad adicional
-    s7: {start: 70.3, end: 84.0, voiceAt: 70.5}, // cierre
+    s6: {start: 58.4, end: 74.7, voiceAt: 58.6}, // sorteos como posibilidad adicional
+    s7: {start: 74.7, end: 88.4, voiceAt: 74.9}, // cierre
   },
 };
 
@@ -83,8 +83,9 @@ export const CAPTIONS: Record<keyof typeof VOICE, Cue[]> = {
   s6: [
     {from: 0, to: 2, text: '¡Y algo más!'},
     {from: 3, to: 9, text: 'Durante ese periodo también tienes la posibilidad'},
-    {from: 10, to: 17, text: 'de salir adjudicado mediante los sorteos del programa'},
-    {from: 18, to: 26, text: 'y acceder a tu vehículo antes del mes 24.'},
+    {from: 10, to: 17, text: 'de salir adjudicado mediante los sorteos del programa,'},
+    {from: 18, to: 26, text: 'en los meses 1, 5, 10, 15 y 20,'},
+    {from: 27, to: 35, text: 'y acceder a tu vehículo antes del mes 24.'},
   ],
   s7: [
     {from: 0, to: 8, text: '¡Haz realidad el sueño de estrenar tu auto nuevo!'},

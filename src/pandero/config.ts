@@ -11,6 +11,8 @@ export const CONFIG = {
   advisor: 'Daniel Domínguez',
   role: 'Asesor vehicular de Pandero',
   whatsapp: '943 455 094',
+  // Reference price shown on screen (scene 1 and the close). Set show: false to hide it.
+  price: {show: true, text: 'Cuotas desde US$259 al mes', note: 'Precio referencial según modelo y plan'},
   scenes: {
     s1: {start: 0, end: 12.7, voiceAt: 0.5}, // bienvenida con el auto
     s2: {start: 12.7, end: 22.7, voiceAt: 12.9}, // iPhone: dos formas de pago

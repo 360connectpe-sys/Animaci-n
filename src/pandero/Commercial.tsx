@@ -288,6 +288,14 @@ export const PanderoCommercial: React.FC = () => {
                 <div style={{fontSize: 34, fontWeight: 700, color: '#33466b'}}>{CONFIG.role}</div>
               </div>
             </Reveal>
+            {CONFIG.price.show && (
+              <Reveal p={prog(s, wordAt('s1', 8) - 0.1, wordAt('s1', 8) + 0.5)} style={{position: 'absolute', left: 330, top: 1110, width: 620}}>
+                <div style={{background: RED, borderRadius: 22, padding: '12px 18px', textAlign: 'center', color: '#fff', boxShadow: '0 14px 30px rgba(0,0,0,0.35)'}}>
+                  <div style={{fontFamily: FONT, fontSize: 38}}>{CONFIG.price.text}</div>
+                  <div style={{fontFamily: FONT_TEXT, fontSize: 22, fontWeight: 700, opacity: 0.9}}>{CONFIG.price.note}</div>
+                </div>
+              </Reveal>
+            )}
           </>
         )}
 
@@ -344,6 +352,14 @@ export const PanderoCommercial: React.FC = () => {
                 </div>
               </div>
             </Reveal>
+            {CONFIG.price.show && (
+              <Reveal p={prog(s, S.s4.start + 0.8, S.s4.start + 1.3)} style={{position: 'absolute', left: 150, top: 1060, width: 780}}>
+                <div style={{background: RED, borderRadius: 22, padding: '10px 18px', textAlign: 'center', color: '#fff'}}>
+                  <div style={{fontFamily: FONT, fontSize: 40}}>{CONFIG.price.text}</div>
+                  <div style={{fontFamily: FONT_TEXT, fontSize: 22, fontWeight: 700, opacity: 0.9}}>{CONFIG.price.note}</div>
+                </div>
+              </Reveal>
+            )}
           </>
         )}
       </AbsoluteFill>

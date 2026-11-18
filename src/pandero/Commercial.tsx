@@ -2,9 +2,10 @@ import React from 'react';
 import {AbsoluteFill, Audio, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {CAPTIONS, CONFIG, VOICE, Word, wordAt} from './config';
 import {Presenter} from './Presenter';
+import {GenericCar} from './GenericCar';
 
 type SceneKey = keyof typeof VOICE;
-const SCENES: SceneKey[] = ['s1', 's2', 's3', 's4', 's5'];
+const SCENES: SceneKey[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7'];
 const BLUE = '#0a3d8f';
 const NAVY = '#062a66';
 const RED = '#e31b23';
@@ -18,10 +19,11 @@ const ease = (t: number) => {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 };
 const prog = (s: number, a: number, b: number) => ease((s - a) / (b - a));
-const sceneAt = (s: number): SceneKey => SCENES.find((k) => s < CONFIG.scenes[k].end) ?? 's5';
+const sceneAt = (s: number): SceneKey => SCENES.find((k) => s < CONFIG.scenes[k].end) ?? 's7';
 const W = (k: SceneKey, i: number, e: 'start' | 'end' = 'start') => wordAt(k, i, e);
+const lin = (s: number, a: number, b: number, v0: number, v1: number) =>
+  interpolate(s, [a, b], [v0, v1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 
-/** Mouth from word timings: one opening per syllable. */
 const mouthAt = (s: number) => {
   for (const k of SCENES) {
     const t = s - CONFIG.scenes[k].voiceAt;
@@ -37,8 +39,19 @@ const mouthAt = (s: number) => {
   return {open: 0, wide: 0.5};
 };
 
+/** Mask reveal: wipes in from the left. */
 const Reveal: React.FC<{p: number; children: React.ReactNode; style?: React.CSSProperties}> = ({p, children, style}) => (
   <div style={{...style, clipPath: `inset(0 ${100 - clamp(p) * 100}% 0 0)`}}>{children}</div>
+);
+
+/** Big headline with a mask reveal and a red underline that draws after it. */
+const Headline: React.FC<{p: number; text: string; top?: number; size?: number}> = ({p, text, top = 120, size = 64}) => (
+  <div style={{position: 'absolute', left: 60, top, width: 960, textAlign: 'center'}}>
+    <Reveal p={p}>
+      <div style={{fontFamily: FONT, fontWeight: 900, fontSize: size, lineHeight: 1.05, color: '#fff', textShadow: '0 6px 18px rgba(0,0,0,0.35)'}}>{text}</div>
+    </Reveal>
+    <div style={{margin: '14px auto 0', width: 260 * clamp((p - 0.6) / 0.4), height: 10, borderRadius: 5, background: RED}} />
+  </div>
 );
 
 const Background: React.FC<{s: number}> = ({s}) => (
@@ -54,129 +67,73 @@ const Background: React.FC<{s: number}> = ({s}) => (
   </AbsoluteFill>
 );
 
-const LogoCard: React.FC<{show: number; top?: number}> = ({show, top = 130}) => (
-  <div style={{position: 'absolute', left: 300, top, width: 480, height: 190, background: '#fff', borderRadius: 26, boxShadow: '0 18px 40px rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `translateY(${(1 - show) * -260}px)`, opacity: show}}>
-    <Img src={staticFile('pandero/logo-crop.png')} style={{width: 420, height: 'auto'}} />
+const LogoCard: React.FC<{show: number; top?: number}> = ({show, top = 100}) => (
+  <div style={{position: 'absolute', left: 320, top, width: 440, height: 172, background: '#fff', borderRadius: 24, boxShadow: '0 18px 40px rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `translateY(${(1 - show) * -260}px)`, opacity: show}}>
+    <Img src={staticFile('pandero/logo-crop.png')} style={{width: 380, height: 'auto'}} />
   </div>
 );
 
-const Car: React.FC<{x: number; y: number; w: number}> = ({x, y, w}) => (
-  <div style={{position: 'absolute', left: x, top: y, width: w}}>
-    <div style={{position: 'absolute', left: '6%', right: '6%', bottom: -14, height: 34, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', filter: 'blur(10px)'}} />
-    <Img src={staticFile('pandero/auto.png')} style={{width: '100%', height: 'auto', position: 'relative'}} />
-  </div>
-);
+/** Car that drives in: `p` 0..1 (0 = off screen to the right). Wheels turn with the travel. */
+const Car: React.FC<{p: number; top: number; width?: number; from?: number}> = ({p, top, width = 960, from = 1100}) => {
+  const dx = (1 - p) * from;
+  return (
+    <div style={{position: 'absolute', left: (1080 - width) / 2 + dx, top}}>
+      <GenericCar width={width} wheel={-dx * 0.9} />
+    </div>
+  );
+};
 
-const PriceBadge: React.FC<{p: number; top: number; scale?: number}> = ({p, top, scale = 1}) =>
-  CONFIG.price.show ? (
-    <Reveal p={p} style={{position: 'absolute', left: 110, top, width: 860, transform: `scale(${scale})`, transformOrigin: '50% 0%'}}>
-      <div style={{background: RED, borderRadius: 28, padding: '16px 20px', textAlign: 'center', color: '#fff', boxShadow: '0 16px 36px rgba(0,0,0,0.35)'}}>
-        <div style={{fontFamily: FONT, fontWeight: 900, fontSize: 72, lineHeight: 1.05}}>{CONFIG.price.big}</div>
-        <div style={{fontFamily: TXT, fontWeight: 800, fontSize: 30, opacity: 0.92}}>{CONFIG.price.note}</div>
-      </div>
-    </Reveal>
-  ) : null;
-
-/** iPhone-style frame, thin bezel; children render inside the screen. */
-const Phone: React.FC<{title: string; children: React.ReactNode}> = ({title, children}) => (
-  <div style={{position: 'absolute', left: 260, top: 210, width: 560, height: 900, borderRadius: 76, background: '#0b0d12', padding: 12, boxShadow: '0 30px 70px rgba(0,0,0,0.5)'}}>
-    <div style={{position: 'relative', width: '100%', height: '100%', borderRadius: 64, overflow: 'hidden', background: '#f3f6fc'}}>
-      <div style={{position: 'absolute', left: 198, top: 16, width: 140, height: 38, borderRadius: 20, background: '#0b0d12'}} />
-      <div style={{position: 'absolute', top: 74, left: 0, right: 0, textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 34, color: BLUE}}>{title}</div>
+const Phone: React.FC<{title: string; children: React.ReactNode; top?: number}> = ({title, children, top = 330}) => (
+  <div style={{position: 'absolute', left: 280, top, width: 520, height: 790, borderRadius: 72, background: '#0b0d12', padding: 12, boxShadow: '0 30px 70px rgba(0,0,0,0.5)'}}>
+    <div style={{position: 'relative', width: '100%', height: '100%', borderRadius: 60, overflow: 'hidden', background: '#f3f6fc'}}>
+      <div style={{position: 'absolute', left: 184, top: 14, width: 128, height: 36, borderRadius: 20, background: '#0b0d12'}} />
+      <div style={{position: 'absolute', top: 66, left: 0, right: 0, textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 30, color: BLUE}}>{title}</div>
       {children}
     </div>
   </div>
 );
 
-/** Scene 2: the two ways to reach 24 installments. */
-const TwoWays: React.FC<{option: number; paid: number}> = ({option, paid}) => {
-  const tab = (n: number, label: string) => (
-    <div style={{flex: 1, borderRadius: 16, padding: '12px 6px', textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 25, lineHeight: 1.15, background: option === n ? BLUE : '#dfe7f5', color: option === n ? '#fff' : '#33466b'}}>{label}</div>
-  );
-  return (
-    <>
-      <div style={{position: 'absolute', top: 126, left: 26, right: 26, display: 'flex', gap: 12}}>
-        {tab(1, '1 cuota al mes')}
-        {tab(2, 'Adelantar cuotas')}
-      </div>
-      <div style={{position: 'absolute', top: 214, left: 0, right: 0, textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 30, color: '#33466b'}}>
-        Cuotas pagadas: {Math.round(paid)} / 24
-      </div>
-      <div style={{position: 'absolute', top: 262, left: 26, right: 26, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10}}>
-        {Array.from({length: 24}, (_, i) => i + 1).map((n) => {
-          const done = paid >= n - 0.01;
-          return (
-            <div key={n} style={{height: 80, borderRadius: 16, background: done ? (option === 2 ? RED : BLUE) : '#fff', border: `3px solid ${done ? (option === 2 ? RED : BLUE) : '#c9d5ea'}`, color: done ? '#fff' : '#33466b', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: TXT, fontWeight: 900}}>
-              <div style={{fontSize: 18, opacity: 0.85}}>Cuota</div>
-              <div style={{fontSize: 32, lineHeight: 1}}>{n}</div>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
-};
-
-/** Scene 3: group months with a draw (1, 5, 10, 15, 20) drawn as ascending steps. */
-const DrawSteps: React.FC<{lit: number[]; s: number}> = ({lit, s}) => {
-  const months = [1, 5, 10, 15, 20];
-  return (
-    <>
-      <div style={{position: 'absolute', top: 124, left: 30, right: 30, textAlign: 'center', fontFamily: TXT, fontWeight: 800, fontSize: 26, color: '#33466b'}}>
-        Meses del grupo con sorteo
-      </div>
-      {months.map((m, i) => {
-        const on = lit[i];
-        const pulse = on > 0.5 ? 1 + 0.04 * Math.sin(s * 8 - i) : 1;
-        return (
-          <div
-            key={m}
-            style={{
-              position: 'absolute',
-              left: 34 + i * 34,
-              top: 690 - i * 118,
-              width: 330,
-              height: 100,
-              borderRadius: 20,
-              background: on > 0.5 ? BLUE : '#e2e9f6',
-              border: `4px solid ${on > 0.5 ? GOLD : '#c9d5ea'}`,
-              color: on > 0.5 ? '#fff' : '#7a8aa8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0 22px',
-              boxSizing: 'border-box',
-              transform: `scale(${(0.94 + 0.06 * on) * pulse})`,
-              boxShadow: on > 0.5 ? '0 12px 26px rgba(10,61,143,0.45)' : 'none',
-              fontFamily: TXT,
-              fontWeight: 900,
-            }}
-          >
-            <span style={{fontSize: 44}}>MES {m}</span>
-            <span style={{fontSize: 34, opacity: on}}>★</span>
-          </div>
-        );
-      })}
-      <div style={{position: 'absolute', bottom: 34, left: 30, right: 30, textAlign: 'center', fontFamily: TXT, fontWeight: 700, fontSize: 22, color: '#5a6b8c'}}>
-        Son meses del grupo, no cuotas pagadas
-      </div>
-    </>
-  );
-};
-
-const StepCard: React.FC<{n: number; title: string; active: number; reveal: number; top: number; icon: React.ReactNode}> = ({n, title, active, reveal, top, icon}) => (
-  <Reveal p={reveal} style={{position: 'absolute', left: 110, width: 860, height: 210, top}}>
-    <div style={{width: '100%', height: '100%', borderRadius: 30, background: `rgba(255,255,255,${0.16 + 0.84 * active})`, border: '3px solid rgba(255,255,255,0.7)', borderLeft: `18px solid ${active > 0.5 ? RED : 'rgba(255,255,255,0.7)'}`, display: 'flex', alignItems: 'center', gap: 28, padding: '0 36px', boxSizing: 'border-box', transform: `scale(${1 + 0.04 * active})`, boxShadow: active > 0.5 ? '0 20px 50px rgba(0,0,0,0.35)' : 'none'}}>
-      <div style={{width: 110, height: 110, borderRadius: 55, background: active > 0.5 ? BLUE : 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: FONT, fontSize: 40}}>{icon}</div>
-      <div style={{fontFamily: TXT, color: active > 0.5 ? BLUE : '#fff'}}>
-        <div style={{fontSize: 30, fontWeight: 800, opacity: 0.8}}>Paso {n}</div>
-        <div style={{fontSize: 48, fontWeight: 900, lineHeight: 1.08}}>{title}</div>
-      </div>
-    </div>
-  </Reveal>
+/** 24-cell calendar. `filled` 0..24 cells done; `label` per cell; optional sparkles for draws. */
+const Calendar24: React.FC<{filled: number; label: string; color?: string; top?: number; sparkle?: (n: number) => number; mark24?: number}> = ({
+  filled,
+  label,
+  color = BLUE,
+  top = 190,
+  sparkle,
+  mark24 = 0,
+}) => (
+  <div style={{position: 'absolute', top, left: 24, right: 24, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 9}}>
+    {Array.from({length: 24}, (_, i) => i + 1).map((n) => {
+      const done = filled >= n - 0.01;
+      const sp = sparkle ? sparkle(n) : 0;
+      const is24 = n === 24 && mark24 > 0.5;
+      return (
+        <div
+          key={n}
+          style={{
+            height: 72,
+            borderRadius: 14,
+            background: is24 ? GOLD : done ? color : '#fff',
+            border: `3px solid ${is24 ? GOLD : sp > 0.05 ? GOLD : done ? color : '#c9d5ea'}`,
+            color: is24 ? NAVY : done ? '#fff' : '#33466b',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: TXT,
+            fontWeight: 900,
+            transform: `scale(${1 + 0.08 * sp})`,
+            boxShadow: sp > 0.05 ? `0 0 ${18 * sp}px ${GOLD}` : 'none',
+          }}
+        >
+          <div style={{fontSize: 16, opacity: 0.85}}>{label}</div>
+          <div style={{fontSize: 30, lineHeight: 1}}>{n}</div>
+        </div>
+      );
+    })}
+  </div>
 );
 
-/** Large captions, max two lines, in a safe band clear of the car, price and WhatsApp. */
 const Caption: React.FC<{s: number}> = ({s}) => {
   for (const k of SCENES) {
     for (const c of CAPTIONS[k]) {
@@ -186,7 +143,7 @@ const Caption: React.FC<{s: number}> = ({s}) => {
         const o = clamp((s - a) / 0.12) * clamp((b - s) / 0.12);
         return (
           <div style={{position: 'absolute', left: 400, top: 1350, width: 570, height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: o}}>
-            <div style={{background: 'rgba(4,22,56,0.86)', borderRadius: 20, padding: '14px 22px', fontFamily: TXT, fontWeight: 900, fontSize: 46, lineHeight: 1.18, color: '#fff', textAlign: 'center', borderBottom: `6px solid ${RED}`}}>
+            <div style={{background: 'rgba(4,22,56,0.86)', borderRadius: 20, padding: '14px 22px', fontFamily: TXT, fontWeight: 900, fontSize: 44, lineHeight: 1.18, color: '#fff', textAlign: 'center', borderBottom: `6px solid ${RED}`}}>
               {c.text}
             </div>
           </div>
@@ -198,7 +155,7 @@ const Caption: React.FC<{s: number}> = ({s}) => {
 };
 
 const Wipe: React.FC<{s: number}> = ({s}) => {
-  for (const k of ['s2', 's3', 's4', 's5'] as SceneKey[]) {
+  for (const k of SCENES.slice(1)) {
     const t = (s - CONFIG.scenes[k].start + 0.25) / 0.5;
     if (t > 0 && t < 1) {
       const x = -1400 + t * 2900;
@@ -213,6 +170,44 @@ const Wipe: React.FC<{s: number}> = ({s}) => {
   return null;
 };
 
+/** Scene 5 process: nodes connected by a line that draws as each step is named. */
+const PROCESS = [
+  {label: 'Asesoría personalizada', icon: '💬', word: 7},
+  {label: 'Revisión de requisitos', icon: '✔', word: 11},
+  {label: 'Documentación', icon: '📄', word: 14},
+  {label: 'Proceso de adjudicación', icon: '★', word: 18},
+  {label: 'Entrega del vehículo', icon: '🔑', word: 23},
+];
+const Process: React.FC<{s: number}> = ({s}) => {
+  const ys = [330, 490, 650, 810, 970];
+  const xs = [200, 540, 200, 540, 200];
+  const on = PROCESS.map((p) => prog(s, W('s5', p.word) - 0.25, W('s5', p.word) + 0.2));
+  return (
+    <>
+      <svg width={1080} height={1920} style={{position: 'absolute'}}>
+        {PROCESS.slice(1).map((_, i) => {
+          const x0 = xs[i] + 60;
+          const y0 = ys[i] + 60;
+          const x1 = xs[i + 1] + 60;
+          const y1 = ys[i + 1] + 60;
+          const len = Math.hypot(x1 - x0, y1 - y0);
+          return (
+            <line key={i} x1={x0} y1={y0} x2={x1} y2={y1} stroke={GOLD} strokeWidth={8} strokeLinecap="round" strokeDasharray={len} strokeDashoffset={len * (1 - on[i + 1])} />
+          );
+        })}
+      </svg>
+      {PROCESS.map((p, i) => (
+        <div key={p.label} style={{position: 'absolute', left: xs[i], top: ys[i], display: 'flex', alignItems: 'center', gap: 18, opacity: 0.25 + 0.75 * on[i], transform: `scale(${0.9 + 0.1 * on[i]})`, transformOrigin: '60px 60px'}}>
+          <div style={{width: 120, height: 120, borderRadius: 60, background: on[i] > 0.5 ? '#fff' : 'rgba(255,255,255,0.2)', border: `5px solid ${on[i] > 0.5 ? GOLD : 'rgba(255,255,255,0.5)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 54, color: BLUE}}>{p.icon}</div>
+          <Reveal p={on[i]}>
+            <div style={{fontFamily: TXT, fontWeight: 900, fontSize: 38, color: '#fff', width: 330, lineHeight: 1.1}}>{p.label}</div>
+          </Reveal>
+        </div>
+      ))}
+    </>
+  );
+};
+
 export const PanderoCommercial: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
@@ -223,55 +218,49 @@ export const PanderoCommercial: React.FC = () => {
 
   // presenter
   const m = mouthAt(s);
-  const blink = [2.2, 6.1, 10.4, 14.0, 18.3, 22.9, 26.1, 31.0, 36.4, 41.5, 46.2, 50.8, 55.6, 60.2, 64.5].some((b) => s >= b && s < b + 0.13) ? 1 : 0;
+  const blink = [2.2, 6.1, 10.4, 14.0, 18.3, 22.9, 26.1, 31.0, 36.4, 41.5, 46.2, 50.8, 55.6, 60.2, 64.5, 68.8, 73.1, 77.6, 81.9].some((b) => s >= b && s < b + 0.13) ? 1 : 0;
   const point = Math.max(
-    prog(s, W('s2', 3), W('s2', 4)) * (1 - prog(s, W('s2', 23, 'end'), W('s2', 23, 'end') + 0.4)),
-    prog(s, W('s3', 4), W('s3', 5)) * (1 - prog(s, W('s3', 20, 'end'), W('s3', 21))),
-    prog(s, W('s5', 5), W('s5', 6)) * (1 - prog(s, W('s5', 11), W('s5', 12))),
+    prog(s, W('s2', 3), W('s2', 4)) * (1 - prog(s, W('s2', 20), W('s2', 21))),
+    prog(s, W('s4', 11), W('s4', 12)) * (1 - prog(s, W('s4', 17, 'end'), W('s4', 18))),
+    prog(s, W('s5', 6), W('s5', 7)) * (1 - prog(s, W('s5', 23), W('s5', 24))),
+    prog(s, W('s7', 17), W('s7', 18)) * (1 - prog(s, W('s7', 22, 'end') + 0.6, W('s7', 22, 'end') + 1.0)),
   );
   const nod = Math.max(...SCENES.flatMap((k) => (VOICE[k].words as Word[]).map((w, i) => (i % 4 === 0 ? Math.max(0, 1 - Math.abs(s - (S[k].voiceAt + w.start)) / 0.25) : 0))));
 
-  // camera: move in on the information each scene is about
+  // purposeful camera: push toward what the narration is about
   let zoom = 1;
   let oy = 760;
-  if (sc === 's1') {
-    zoom = CONFIG.price.show ? interpolate(s, [0, W('s1', 16), W('s1', 23, 'end'), S.s1.end], [1, 1, 1.1, 1.1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : interpolate(s, [0, S.s1.end], [1, 1.05]);
-    oy = 1000;
+  if (sc === 's1') zoom = lin(s, 0, S.s1.end, 1, 1.05);
+  if (sc === 's2' || sc === 's3' || sc === 's6') {
+    zoom = interpolate(s, [S[sc].start, S[sc].start + 1, S[sc].end], [0.92, 1.04, 1.08], {extrapolateRight: 'clamp'});
+    oy = 700;
   }
-  if (sc === 's2' || sc === 's3') {
-    zoom = interpolate(s, [S[sc].start, S[sc].start + 1.0, S[sc].end], [0.9, 1.08, 1.12], {extrapolateRight: 'clamp'});
-    oy = 660;
+  if (sc === 's4') {
+    zoom = lin(s, W('s4', 12), W('s4', 17, 'end'), 1, 1.07);
+    oy = 940;
   }
-  if (sc === 's4') zoom = interpolate(s, [S.s4.start, S.s4.end], [1, 1.04]);
 
-  // scene 1
-  const s1Car = sp(0);
-  const nameP = prog(s, W('s1', 2) - 0.1, W('s1', 2) + 0.4);
-
-  // scene 2
-  const option = s >= W('s2', 16) - 0.1 ? 2 : 1;
-  const paid =
-    option === 1
-      ? interpolate(s, [W('s2', 4), W('s2', 15, 'end')], [0, 24], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})
-      : interpolate(s, [W('s2', 22), W('s2', 23, 'end')], [0, 24], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const paid24 = prog(s, W('s2', 23, 'end'), W('s2', 23, 'end') + 0.45);
-
-  // scene 3
-  const lit = [7, 8, 9, 10, 12].map((i) => prog(s, W('s3', i) - 0.05, W('s3', i) + 0.2));
-  const drawChip = prog(s, W('s3', 20) - 0.1, W('s3', 20) + 0.4);
-  const chosen = prog(s, W('s3', 23) - 0.1, W('s3', 23) + 0.4);
-
-  // scene 4
-  const carBack = W('s4', 19) - 0.15;
-  const stepsOut = prog(s, carBack - 0.1, carBack + 0.4);
-  const st1 = prog(s, W('s4', 5) - 0.2, W('s4', 5) + 0.3);
-  const req = prog(s, W('s4', 10) - 0.2, W('s4', 10) + 0.3);
-  const st2 = prog(s, W('s4', 15) - 0.2, W('s4', 15) + 0.3);
-  const s4Car = spring({frame: frame - Math.round(carBack * fps), fps, config: {damping: 16, stiffness: 120}});
-  const keep = prog(s, W('s4', 26) - 0.2, W('s4', 26) + 0.4);
-
-  // scene 5
-  const card = prog(s, S.s5.start + 0.3, S.s5.start + 0.9);
+  // scene 2: advance installments in bursts, whenever you decide
+  const adv = interpolate(
+    s,
+    [W('s2', 4), W('s2', 5), W('s2', 9), W('s2', 10), W('s2', 15), W('s2', 17), W('s2', 20, 'end')],
+    [0, 6, 6, 14, 14, 20, 24],
+    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+  );
+  // scene 3: month by month up to month 24, then a new car
+  const monthly = lin(s, W('s3', 5), W('s3', 14, 'end'), 0, 24);
+  const s3CarAt = W('s3', 19);
+  const phoneOut3 = prog(s, s3CarAt - 0.2, s3CarAt + 0.4);
+  // scene 4: 60-installment timeline
+  const firstDone = lin(s, S.s4.start + 0.3, S.s4.start + 1.6, 0, 24);
+  const restOn = prog(s, W('s4', 12) - 0.1, W('s4', 13) + 0.2);
+  const count36 = Math.round(lin(s, W('s4', 13), W('s4', 17, 'end'), 0, 36));
+  // scene 6: discreet draw sparkles (no specific months)
+  const drawOn = prog(s, W('s6', 15) - 0.2, W('s6', 15) + 0.4);
+  const sparkle = (n: number) => {
+    const ph = (s * 1.3 + n * 0.61) % 3;
+    return drawOn * (ph < 0.6 ? Math.sin((ph / 0.6) * Math.PI) : 0) * ([3, 7, 11, 16, 19].includes(n) ? 1 : 0.35);
+  };
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
@@ -280,20 +269,13 @@ export const PanderoCommercial: React.FC = () => {
       <AbsoluteFill style={{transform: `scale(${zoom})`, transformOrigin: `540px ${oy}px`}}>
         {sc === 's1' && (
           <>
-            <LogoCard show={sp(0)} top={110} />
-            <div style={{position: 'absolute', left: 60, top: 350, fontFamily: TXT, fontWeight: 900, fontSize: 40, color: '#fff', opacity: s1Car}}>{CONFIG.model}</div>
-            <Car x={40 + (1 - s1Car) * 1100} y={400} w={1000} />
-            {CONFIG.price.show ? (
-              <PriceBadge p={prog(s, 0.2, 0.8)} top={800} scale={1 + 0.06 * prog(s, W('s1', 17), W('s1', 18))} />
-            ) : (
-              <Reveal p={prog(s, W('s1', 17) - 0.2, W('s1', 17) + 0.3)} style={{position: 'absolute', left: 110, top: 800, width: 860}}>
-                <div style={{background: RED, borderRadius: 28, padding: '22px 20px', textAlign: 'center', color: '#fff', fontFamily: FONT, fontWeight: 900, fontSize: 70}}>Pandero Ya</div>
-              </Reveal>
-            )}
-            <Reveal p={nameP} style={{position: 'absolute', left: 400, top: 1060, width: 570}}>
-              <div style={{background: '#fff', borderRadius: 20, padding: '12px 22px', borderLeft: `14px solid ${RED}`, fontFamily: TXT}}>
-                <div style={{fontSize: 40, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
-                <div style={{fontSize: 26, fontWeight: 800, color: '#33466b'}}>{CONFIG.role}</div>
+            <LogoCard show={sp(0)} />
+            <Headline p={prog(s, 0.4, 1.2)} top={320} text="¡ESTRENA TU AUTO NUEVO!" size={66} />
+            <Car p={sp(0.6)} top={540} />
+            <Reveal p={prog(s, W('s1', 2) - 0.1, W('s1', 2) + 0.4)} style={{position: 'absolute', left: 140, top: 940, width: 800}}>
+              <div style={{background: '#fff', borderRadius: 22, padding: '16px 28px', borderLeft: `16px solid ${RED}`, fontFamily: TXT}}>
+                <div style={{fontSize: 50, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
+                <div style={{fontSize: 32, fontWeight: 800, color: '#33466b'}}>{CONFIG.role}</div>
               </div>
             </Reveal>
           </>
@@ -301,73 +283,135 @@ export const PanderoCommercial: React.FC = () => {
 
         {sc === 's2' && (
           <>
-            <div style={{transform: `translateY(${(1 - sp(S.s2.start + 0.05)) * 1200}px)`}}>
-              <Phone title="Pandero Ya">
-                <TwoWays option={option} paid={paid} />
+            <Headline p={prog(s, S.s2.start + 0.1, S.s2.start + 0.8)} top={140} text="ADELANTA TUS PRIMERAS 24 CUOTAS" size={56} />
+            <div style={{transform: `translateY(${(1 - sp(S.s2.start + 0.2)) * 1200}px)`}}>
+              <Phone title="Cuotas adelantadas" top={330}>
+                <div style={{position: 'absolute', top: 104, left: 0, right: 0, textAlign: 'center', fontFamily: FONT, fontWeight: 900, fontSize: 64, color: RED, lineHeight: 1}}>
+                  {Math.round(adv)} <span style={{fontSize: 32, color: '#33466b'}}>/ 24</span>
+                </div>
+                <Calendar24 filled={adv} label="Cuota" top={190} />
+                <Reveal p={prog(s, W('s2', 9) - 0.1, W('s2', 9) + 0.4)} style={{position: 'absolute', bottom: 22, left: 24, right: 24}}>
+                  <div style={{background: BLUE, color: '#fff', borderRadius: 14, padding: '8px 10px', textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 24}}>Dentro de los primeros 24 meses</div>
+                </Reveal>
               </Phone>
             </div>
-            <Reveal p={paid24} style={{position: 'absolute', left: 350, top: 1135, width: 500}}>
-              <div style={{background: GOLD, color: NAVY, borderRadius: 30, height: 96, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontWeight: 900, fontSize: 44}}>✓ 24 cuotas pagadas</div>
+            <Reveal p={prog(s, W('s2', 15) - 0.1, W('s2', 15) + 0.4)} style={{position: 'absolute', left: 350, top: 1135, width: 520}}>
+              <div style={{background: GOLD, color: NAVY, borderRadius: 30, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontWeight: 900, fontSize: 36}}>Cuando tú decidas</div>
             </Reveal>
           </>
         )}
 
         {sc === 's3' && (
           <>
-            <div style={{transform: `translateY(${(1 - sp(S.s3.start + 0.05)) * 1200}px)`}}>
-              <Phone title="Sorteo del grupo">
-                <DrawSteps lit={lit} s={s} />
+            <Headline p={prog(s, S.s3.start + 0.1, S.s3.start + 0.8)} top={140} text="PAGA MES A MES HASTA EL MES 24" size={56} />
+            <div style={{opacity: 1 - phoneOut3, transform: `translateY(${(1 - sp(S.s3.start + 0.2)) * 1200 - phoneOut3 * 200}px)`}}>
+              <Phone title="Pago mensual" top={330}>
+                <div style={{position: 'absolute', top: 104, left: 0, right: 0, textAlign: 'center', fontFamily: FONT, fontWeight: 900, fontSize: 52, color: BLUE, lineHeight: 1.1}}>
+                  Mes {Math.max(1, Math.ceil(monthly))}
+                </div>
+                <Calendar24 filled={monthly} label="Mes" color="#2f6fd6" top={190} mark24={prog(s, W('s3', 14), W('s3', 14) + 0.3)} />
               </Phone>
             </div>
-            <Reveal p={chosen > 0 ? chosen : drawChip} style={{position: 'absolute', left: 350, top: 1135, width: 500}}>
-              <div style={{background: chosen > 0.5 ? GOLD : RED, color: chosen > 0.5 ? NAVY : '#fff', borderRadius: 30, height: 96, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontWeight: 900, fontSize: chosen > 0.5 ? 34 : 42, textAlign: 'center', lineHeight: 1.1}}>
-                {chosen > 0.5 ? '¡Elegido! Trámites antes' : 'Participas en el sorteo'}
-              </div>
-            </Reveal>
-          </>
-        )}
-
-        {sc === 's4' && (
-          <>
-            <div style={{opacity: 1 - stepsOut, transform: `translateX(${-stepsOut * 300}px)`}}>
-              <Reveal p={prog(s, S.s4.start, S.s4.start + 0.6)} style={{position: 'absolute', left: 110, top: 300, width: 860}}>
-                <div style={{color: '#fff', fontFamily: TXT, fontWeight: 900, fontSize: 46}}>Si no sales elegido:</div>
-              </Reveal>
-              <StepCard n={1} top={400} title="Completas 24 cuotas" active={st1 * (1 - st2)} reveal={prog(s, S.s4.start + 0.3, S.s4.start + 0.8)} icon="24" />
-              <Reveal p={req} style={{position: 'absolute', left: 150, top: 640, width: 780}}>
-                <div style={{color: '#fff', fontFamily: TXT, fontWeight: 900, fontSize: 36, textAlign: 'center'}}>+ requisitos del programa</div>
-              </Reveal>
-              <StepCard n={2} top={720} title="Inicias los trámites" active={st2} reveal={prog(s, W('s4', 15) - 0.3, W('s4', 15) + 0.2)} icon="✓" />
-            </div>
-            {s >= carBack && (
+            {s >= s3CarAt - 0.2 && (
               <>
-                <Reveal p={prog(s, carBack, carBack + 0.5)} style={{position: 'absolute', left: 110, top: 300, width: 860}}>
-                  <div style={{color: '#fff', fontFamily: FONT, fontWeight: 900, fontSize: 62, textAlign: 'center'}}>¡Te llevas tu auto!</div>
-                </Reveal>
-                <Car x={40 + (1 - s4Car) * 1100} y={430} w={1000} />
-                <Reveal p={keep} style={{position: 'absolute', left: 110, top: 860, width: 860}}>
-                  <div style={{background: RED, color: '#fff', borderRadius: 40, padding: '18px 26px', fontFamily: TXT, fontWeight: 900, fontSize: 38, textAlign: 'center'}}>Sigues pagando las cuotas que te quedan</div>
+                <Car p={spring({frame: frame - Math.round(s3CarAt * fps), fps, config: {damping: 16, stiffness: 120}})} top={430} />
+                <Reveal p={prog(s, s3CarAt + 0.3, s3CarAt + 0.8)} style={{position: 'absolute', left: 120, top: 830, width: 840}}>
+                  <div style={{background: '#fff', color: BLUE, borderRadius: 26, padding: '16px 20px', textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 38, borderLeft: `14px solid ${RED}`}}>
+                    No necesitas adelantar todas las cuotas
+                  </div>
                 </Reveal>
               </>
             )}
           </>
         )}
 
+        {sc === 's4' && (
+          <>
+            <Headline p={prog(s, S.s4.start + 0.1, S.s4.start + 0.8)} top={120} text="CONTINÚAS PAGANDO LAS 36 CUOTAS RESTANTES" size={52} />
+            <Car p={sp(S.s4.start + 0.1)} top={370} width={720} />
+            <Reveal p={prog(s, W('s4', 6), W('s4', 8, 'end'))} style={{position: 'absolute', left: 700, top: 330, width: 260}}>
+              <div style={{background: GOLD, color: NAVY, borderRadius: 20, padding: '8px 12px', textAlign: 'center', fontFamily: TXT, fontWeight: 900, fontSize: 28}}>Vehículo entregado</div>
+            </Reveal>
+            <div style={{position: 'absolute', left: 100, top: 690, width: 880, display: 'flex', justifyContent: 'space-between', fontFamily: TXT, fontWeight: 900, fontSize: 32, color: '#fff'}}>
+              <span>Plan total: 60 cuotas</span>
+              <span style={{color: GOLD, opacity: restOn}}>Faltan: {count36}</span>
+            </div>
+            <div style={{position: 'absolute', left: 100, top: 750, width: 880, display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 8}}>
+              {Array.from({length: 60}, (_, i) => i + 1).map((n) => {
+                const done = n <= firstDone;
+                const rest = n > 24;
+                const pulse = rest ? restOn * (0.5 + 0.5 * Math.sin(s * 5 - n * 0.2)) : 0;
+                return (
+                  <div
+                    key={n}
+                    style={{
+                      height: 52,
+                      borderRadius: 10,
+                      background: done ? '#ffffff' : rest ? `rgba(227,27,35,${0.35 + 0.55 * restOn})` : 'rgba(255,255,255,0.15)',
+                      border: `3px solid ${rest ? (restOn > 0.3 ? GOLD : 'rgba(255,255,255,0.3)') : '#fff'}`,
+                      color: done ? BLUE : '#fff',
+                      fontFamily: TXT,
+                      fontWeight: 900,
+                      fontSize: 20,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transform: `scale(${1 + 0.06 * pulse})`,
+                    }}
+                  >
+                    {done ? '✓' : n}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{position: 'absolute', left: 420, top: 1110, width: 560, display: 'flex', gap: 16, fontFamily: TXT, fontWeight: 900, fontSize: 28}}>
+              <div style={{background: '#fff', color: BLUE, borderRadius: 16, padding: '8px 16px'}}>24 pagadas</div>
+              <div style={{background: RED, color: '#fff', borderRadius: 16, padding: '8px 16px', opacity: restOn}}>36 restantes</div>
+            </div>
+          </>
+        )}
+
         {sc === 's5' && (
           <>
-            <LogoCard show={sp(S.s5.start)} top={110} />
-            <Car x={40} y={340} w={1000} />
-            <Reveal p={card} style={{position: 'absolute', left: 50, top: 740, width: 980}}>
-              <div style={{background: '#fff', borderRadius: 34, padding: '20px 16px', textAlign: 'center', boxShadow: '0 18px 40px rgba(0,0,0,0.35)', borderBottom: `10px solid ${RED}`}}>
-                <div style={{fontFamily: TXT, fontSize: 56, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginTop: 4}}>
-                  <svg width={74} height={74} viewBox="0 0 64 64"><circle cx={32} cy={32} r={28} fill="#25d366" /><path d="M 22 20 Q 18 30 28 40 Q 38 50 46 44 L 42 37 L 37 39 Q 31 35 28 29 L 30 25 Z" fill="#fff" /></svg>
+            <Headline p={prog(s, S.s5.start + 0.1, S.s5.start + 0.8)} top={100} text="TE ACOMPAÑO EN TODO EL PROCESO" size={54} />
+            <Process s={s} />
+          </>
+        )}
+
+        {sc === 's6' && (
+          <>
+            <Headline p={prog(s, W('s6', 3) - 0.3, W('s6', 3) + 0.4)} top={140} text="OPORTUNIDADES ADICIONALES DE ADJUDICACIÓN" size={50} />
+            <div style={{transform: `translateY(${(1 - sp(S.s6.start + 0.2)) * 1200}px)`}}>
+              <Phone title="Sorteos del programa" top={330}>
+                <div style={{position: 'absolute', top: 106, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 800, fontSize: 24, color: '#33466b'}}>Durante los primeros 24 meses</div>
+                <Calendar24 filled={0} label="Mes" top={160} sparkle={sparkle} mark24={prog(s, W('s6', 25), W('s6', 26))} />
+                <div style={{position: 'absolute', bottom: 22, left: 20, right: 20, textAlign: 'center', fontFamily: TXT, fontWeight: 800, fontSize: 20, color: '#5a6b8c'}}>Posibilidad sujeta a sorteo. No garantizada.</div>
+              </Phone>
+            </div>
+          </>
+        )}
+
+        {sc === 's7' && (
+          <>
+            <LogoCard show={sp(S.s7.start)} top={90} />
+            <Car p={sp(S.s7.start + 0.1)} top={300} width={900} />
+            <Reveal p={prog(s, S.s7.start + 0.4, S.s7.start + 1.0)} style={{position: 'absolute', left: 60, top: 650, width: 960}}>
+              <div style={{fontFamily: FONT, fontWeight: 900, fontSize: 62, color: GOLD, textAlign: 'center'}}>¡CONTÁCTAME HOY!</div>
+            </Reveal>
+            <Reveal p={prog(s, S.s7.start + 0.6, S.s7.start + 1.2)} style={{position: 'absolute', left: 50, top: 750, width: 980}}>
+              <div style={{background: '#fff', borderRadius: 32, padding: '18px 16px', textAlign: 'center', boxShadow: '0 18px 40px rgba(0,0,0,0.35)', borderBottom: `10px solid ${RED}`}}>
+                <div style={{fontFamily: TXT, fontSize: 54, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
+                <div style={{fontFamily: TXT, fontSize: 30, fontWeight: 800, color: '#33466b'}}>{CONFIG.role}</div>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginTop: 6}}>
+                  <svg width={72} height={72} viewBox="0 0 64 64"><circle cx={32} cy={32} r={28} fill="#25d366" /><path d="M 22 20 Q 18 30 28 40 Q 38 50 46 44 L 42 37 L 37 39 Q 31 35 28 29 L 30 25 Z" fill="#fff" /></svg>
                   <div style={{fontFamily: TXT, fontSize: 30, fontWeight: 900, color: '#1d8f4a'}}>WhatsApp</div>
-                  <div style={{fontFamily: TXT, fontSize: 84, fontWeight: 900, color: '#0d1b38'}}>{CONFIG.whatsapp}</div>
+                  <div style={{fontFamily: TXT, fontSize: 82, fontWeight: 900, color: '#0d1b38'}}>{CONFIG.whatsapp}</div>
                 </div>
               </div>
             </Reveal>
-            <PriceBadge p={prog(s, S.s5.start + 0.7, S.s5.start + 1.2)} top={1000} scale={0.82} />
+            <div style={{position: 'absolute', left: 80, top: 1060, width: 920, textAlign: 'center', fontFamily: TXT, fontWeight: 700, fontSize: 22, color: '#dce6f7', opacity: prog(s, S.s7.start + 1.0, S.s7.start + 1.6)}}>
+              {CONFIG.legal}
+            </div>
           </>
         )}
       </AbsoluteFill>
@@ -382,6 +426,7 @@ export const PanderoCommercial: React.FC = () => {
       <Caption s={s} />
       <Wipe s={s} />
 
+      <Audio src={staticFile('pandero/musica.mp3')} volume={(f) => interpolate(f / fps, [0, 1, CONFIG.scenes.s7.end - 2, CONFIG.scenes.s7.end], [0, 0.1, 0.1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
       {SCENES.map((k) => (
         <Sequence key={k} from={Math.round(S[k].voiceAt * fps)}>
           <Audio src={staticFile(VOICE[k].file)} />

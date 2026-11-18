@@ -11,12 +11,13 @@ if os.environ.get("CA_BUNDLE"):
 OUT = Path(__file__).resolve().parents[2] / "public" / "pandero" / "voz"
 VOICE = "es-PE-AlexNeural"
 LINES = {
-    "w1": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero. ¿Te imaginas estrenar un Kia Soluto con cuotas desde doscientos cincuenta y nueve dólares al mes? Te explico cómo funciona Pandero Ya.",
-    "w1_sin_precio": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero. ¿Te gustaría saber cómo llevarte tu auto nuevo con Pandero Ya? Te lo explico.",
-    "w2": "Tienes dos caminos. Puedes pagar una cuota al mes y completar las veinticuatro en dos años. O, si quieres llegar antes, puedes adelantar cuotas.",
-    "w3": "Y hay algo más. En los meses uno, cinco, diez, quince y veinte de tu grupo, puedes participar en un sorteo. Si sales elegido, empiezas antes los trámites para llevarte tu auto.",
-    "w4": "Si no sales elegido, al completar las veinticuatro cuotas y cumplir los requisitos del programa, inicias los trámites para llevarte tu auto. Y después de recibirlo, sigues pagando las cuotas que te quedan.",
-    "w5": "¿Qué modelo tienes en mente? Escríbeme por WhatsApp y te ayudo a cotizarlo.",
+    "x1": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero Auto, y hoy te explicaré cómo puedes hacer realidad el sueño de estrenar tu auto nuevo con Pandero Ya.",
+    "x2": "Con Pandero Ya puedes adelantar tus primeras veinticuatro cuotas, dentro de los primeros veinticuatro meses, en el momento que tú decidas, para acceder al proceso de adjudicación de tu auto nuevo.",
+    "x3": "O, si lo prefieres, puedes pagar tus cuotas mensualmente y esperar hasta el mes veinticuatro para acceder a la adjudicación de tu vehículo, según las condiciones del programa.",
+    "x4": "Y recuerda algo importante: después de recibir tu vehículo, deberás continuar pagando las treinta y seis cuotas restantes, de acuerdo con las condiciones de tu contrato.",
+    "x5": "Durante todo este proceso contarás con mi asesoría para conocer los requisitos, preparar tu documentación y realizar los trámites necesarios para adquirir tu auto nuevo.",
+    "x6": "¡Y algo más! Durante ese periodo también tienes la posibilidad de salir adjudicado mediante los sorteos del programa y acceder a tu vehículo antes del mes veinticuatro.",
+    "x7": "¡Haz realidad el sueño de estrenar tu auto nuevo! Soy Daniel Domínguez, asesor vehicular de Pandero Auto. Escríbeme y conoce todas tus opciones.",
 }
 
 async def main():

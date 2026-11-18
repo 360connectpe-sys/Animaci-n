@@ -12,7 +12,8 @@
     "paper:render:ep01": "remotion render src/papercut/index.ts PaperEp01 out/paper-ep01.mp4",
     "paper:audio": "python3 tools/audio/make_ambience.py",
     "pandero:studio": "remotion studio src/pandero/index.ts",
-    "pandero:tts": "python3 tools/pandero/tts.py"
+    "pandero:tts": "python3 tools/pandero/tts.py",
+    "pandero:music": "python3 tools/pandero/music.py 86"
   },
   "repository": {
     "type": "git",

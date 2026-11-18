@@ -11,11 +11,10 @@ if os.environ.get("CA_BUNDLE"):
 OUT = Path(__file__).resolve().parents[2] / "public" / "pandero" / "voz"
 VOICE = "es-PE-AlexNeural"
 LINES = {
-    "s1": "¿Buscas un auto nuevo? Soy Daniel Domínguez y te explico cómo funciona el adelanto de cuotas.",
-    "s1_precio": "¿Buscas un auto nuevo? Conoce esta opción con cuotas mensuales desde doscientos cincuenta y nueve dólares.",
-    "s2": "Con Pandero Ya puedes adelantar pagos. Al completar veinticuatro cuotas y cumplir las condiciones del programa, puedes acceder a la adjudicación anticipada.",
-    "s3": "Una vez adjudicado tu certificado, empiezas los trámites para recibir tu vehículo y continúas pagando las cuotas pendientes.",
-    "s4": "¿Qué modelo tienes en mente? Escríbeme por WhatsApp y revisamos juntos las cuotas y los requisitos.",
+    "v1": "¡Hola! Soy Daniel Domínguez, asesor vehicular de Pandero. Hoy te voy a explicar cómo funciona Pandero Ya y qué pasos debes seguir para llevarte tu auto nuevo.",
+    "v2": "Tienes dos opciones. Puedes adelantar cuotas hasta completar veinticuatro, o pagar una cuota al mes y completarlas en veinticuatro meses.",
+    "v3": "Cuando completas las veinticuatro cuotas y cumples los requisitos del plan, puedes iniciar los trámites de entrega. Una vez que termines esos trámites, podrás llevarte tu auto y seguir pagando las cuotas que te quedan.",
+    "v4": "¿Ya sabes qué auto te gustaría manejar? Escríbeme por WhatsApp y te ayudo a cotizarlo.",
 }
 
 async def main():

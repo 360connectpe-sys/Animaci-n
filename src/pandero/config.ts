@@ -1,71 +1,60 @@
-import s1 from '../../public/pandero/voz/s1.words.json';
-import s1Precio from '../../public/pandero/voz/s1_precio.words.json';
-import s2 from '../../public/pandero/voz/s2.words.json';
-import s3 from '../../public/pandero/voz/s3.words.json';
-import s4 from '../../public/pandero/voz/s4.words.json';
+import v1 from '../../public/pandero/voz/v1.words.json';
+import v2 from '../../public/pandero/voz/v2.words.json';
+import v3 from '../../public/pandero/voz/v3.words.json';
+import v4 from '../../public/pandero/voz/v4.words.json';
 
 export type Word = {text: string; start: number; end: number};
 
-/**
- * Editable content of the Pandero Auto commercial.
- * PRICE: turn `showPrice` on ONLY when Daniel's quote confirms US$259/month for the model and plan shown.
- * When on, scene 1 uses the price voice line (s1_precio) and reveals the price text on the word "doscientos" (word 11).
- */
+/** Editable content of the Pandero Auto commercial. Times in seconds; they follow the real voice lengths. */
 export const CONFIG = {
   fps: 30,
-  showPrice: false,
-  priceText: 'Cuota mensual referencial desde US$259',
   advisor: 'Daniel Domínguez',
-  role: 'Asesor vehicular de Pandero Auto',
+  role: 'Asesor vehicular de Pandero',
   whatsapp: '943 455 094',
-  // Scene boundaries and when each voice line starts (seconds). Follow the real audio lengths.
   scenes: {
-    s1: {start: 0, end: 8.1, voiceAt: 0.6},
-    s2: {start: 8.1, end: 19.6, voiceAt: 8.4},
-    s3: {start: 19.6, end: 28.6, voiceAt: 19.9},
-    s4: {start: 28.6, end: 41.0, voiceAt: 28.9},
+    s1: {start: 0, end: 12.7, voiceAt: 0.5}, // bienvenida con el auto
+    s2: {start: 12.7, end: 22.7, voiceAt: 12.9}, // iPhone: dos formas de pago
+    s3: {start: 22.7, end: 37.4, voiceAt: 22.9}, // pasos y entrega del auto
+    s4: {start: 37.4, end: 49.5, voiceAt: 37.6}, // cierre WhatsApp
   },
 };
 
 export const VOICE = {
-  s1: CONFIG.showPrice ? {file: 'pandero/voz/s1_precio.mp3', words: s1Precio as Word[]} : {file: 'pandero/voz/s1.mp3', words: s1 as Word[]},
-  s2: {file: 'pandero/voz/s2.mp3', words: s2 as Word[]},
-  s3: {file: 'pandero/voz/s3.mp3', words: s3 as Word[]},
-  s4: {file: 'pandero/voz/s4.mp3', words: s4 as Word[]},
+  s1: {file: 'pandero/voz/v1.mp3', words: v1 as Word[]},
+  s2: {file: 'pandero/voz/v2.mp3', words: v2 as Word[]},
+  s3: {file: 'pandero/voz/v3.mp3', words: v3 as Word[]},
+  s4: {file: 'pandero/voz/v4.mp3', words: v4 as Word[]},
 };
 
 /** Subtitle chunks as word-index ranges (max two short lines each). */
 export const CAPTIONS: Record<keyof typeof VOICE, {from: number; to: number; text: string}[]> = {
-  s1: CONFIG.showPrice
-    ? [
-        {from: 0, to: 3, text: '¿Buscas un auto nuevo?'},
-        {from: 4, to: 9, text: 'Conoce esta opción con cuotas mensuales'},
-        {from: 10, to: 99, text: 'desde US$259'},
-      ]
-    : [
-        {from: 0, to: 3, text: '¿Buscas un auto nuevo?'},
-        {from: 4, to: 6, text: 'Soy Daniel Domínguez'},
-        {from: 7, to: 15, text: 'y te explico cómo funciona el adelanto de cuotas.'},
-      ],
+  s1: [
+    {from: 0, to: 0, text: '¡Hola!'},
+    {from: 1, to: 7, text: 'Soy Daniel Domínguez, asesor vehicular de Pandero.'},
+    {from: 8, to: 16, text: 'Hoy te voy a explicar cómo funciona Pandero Ya'},
+    {from: 17, to: 26, text: 'y qué pasos debes seguir para llevarte tu auto nuevo.'},
+  ],
   s2: [
-    {from: 0, to: 5, text: 'Con Pandero Ya puedes adelantar pagos.'},
-    {from: 6, to: 9, text: 'Al completar veinticuatro cuotas'},
-    {from: 10, to: 15, text: 'y cumplir las condiciones del programa,'},
-    {from: 16, to: 21, text: 'puedes acceder a la adjudicación anticipada.'},
+    {from: 0, to: 2, text: 'Tienes dos opciones.'},
+    {from: 3, to: 8, text: 'Puedes adelantar cuotas hasta completar veinticuatro,'},
+    {from: 9, to: 14, text: 'o pagar una cuota al mes'},
+    {from: 15, to: 19, text: 'y completarlas en veinticuatro meses.'},
   ],
   s3: [
-    {from: 0, to: 4, text: 'Una vez adjudicado tu certificado,'},
-    {from: 5, to: 11, text: 'empiezas los trámites para recibir tu vehículo'},
-    {from: 12, to: 17, text: 'y continúas pagando las cuotas pendientes.'},
+    {from: 0, to: 4, text: 'Cuando completas las veinticuatro cuotas'},
+    {from: 5, to: 10, text: 'y cumples los requisitos del plan,'},
+    {from: 11, to: 16, text: 'puedes iniciar los trámites de entrega.'},
+    {from: 17, to: 22, text: 'Una vez que termines esos trámites,'},
+    {from: 23, to: 26, text: 'podrás llevarte tu auto'},
+    {from: 27, to: 34, text: 'y seguir pagando las cuotas que te quedan.'},
   ],
   s4: [
-    {from: 0, to: 4, text: '¿Qué modelo tienes en mente?'},
-    {from: 5, to: 7, text: 'Escríbeme por WhatsApp'},
-    {from: 8, to: 15, text: 'y revisamos juntos las cuotas y los requisitos.'},
+    {from: 0, to: 6, text: '¿Ya sabes qué auto te gustaría manejar?'},
+    {from: 7, to: 9, text: 'Escríbeme por WhatsApp'},
+    {from: 10, to: 14, text: 'y te ayudo a cotizarlo.'},
   ],
 };
 
-/** Absolute time (s) of a word in a scene's voice line. */
 export const wordAt = (scene: keyof typeof VOICE, i: number, edge: 'start' | 'end' = 'start') =>
   CONFIG.scenes[scene].voiceAt + VOICE[scene].words[Math.min(i, VOICE[scene].words.length - 1)][edge];
 

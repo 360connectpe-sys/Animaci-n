@@ -89,45 +89,64 @@ const Car: React.FC<{x: number; y: number; w: number; opacity?: number}> = ({x, 
   </div>
 );
 
-/** Thin-bezel front-facing phone that only shows the payment calendar. */
-const Phone: React.FC<{s: number; paid: number; scroll: number}> = ({paid, scroll}) => {
+/** Thin-bezel front-facing phone that explains the two ways to pay. */
+const Phone: React.FC<{option: number; paid: number}> = ({option, paid}) => {
   const cells = Array.from({length: 24}, (_, i) => i + 1);
+  const tab = (n: number, label: string) => (
+    <div
+      style={{
+        flex: 1,
+        borderRadius: 16,
+        padding: '10px 6px',
+        textAlign: 'center',
+        fontFamily: FONT_TEXT,
+        fontWeight: 800,
+        fontSize: 24,
+        lineHeight: 1.15,
+        background: option === n ? BLUE : '#dfe7f5',
+        color: option === n ? '#fff' : '#33466b',
+      }}
+    >
+      {label}
+    </div>
+  );
   return (
     <div style={{position: 'absolute', left: 270, top: 230, width: 540, height: 880, borderRadius: 74, background: '#0b0d12', padding: 12, boxShadow: '0 30px 70px rgba(0,0,0,0.5)'}}>
       <div style={{position: 'relative', width: '100%', height: '100%', borderRadius: 62, overflow: 'hidden', background: '#f3f6fc'}}>
         <div style={{position: 'absolute', left: 190, top: 16, width: 136, height: 38, borderRadius: 20, background: '#0b0d12'}} />
-        <div style={{position: 'absolute', top: 78, left: 0, right: 0, textAlign: 'center', fontFamily: FONT_TEXT, fontWeight: 800, fontSize: 30, color: BLUE}}>Calendario de pagos</div>
-        <div style={{position: 'absolute', top: 124, left: 40, right: 40, height: 76, borderRadius: 18, background: BLUE, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT_TEXT, fontWeight: 700, fontSize: 30}}>
-          Cuotas pagadas: {Math.round(paid)}
+        <div style={{position: 'absolute', top: 76, left: 0, right: 0, textAlign: 'center', fontFamily: FONT_TEXT, fontWeight: 900, fontSize: 32, color: BLUE}}>Pandero Ya</div>
+        <div style={{position: 'absolute', top: 126, left: 28, right: 28, display: 'flex', gap: 12}}>
+          {tab(1, 'Adelantar cuotas')}
+          {tab(2, '1 cuota al mes')}
         </div>
-        <div style={{position: 'absolute', top: 226, left: 28, right: 28, bottom: 30, overflow: 'hidden'}}>
-          <div style={{transform: `translateY(${-scroll * 560}px)`, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14}}>
-            {cells.map((n) => {
-              const done = paid >= n - 0.01;
-              return (
-                <div
-                  key={n}
-                  style={{
-                    height: 126,
-                    borderRadius: 18,
-                    background: done ? BLUE : '#fff',
-                    border: `3px solid ${done ? BLUE : '#c9d5ea'}`,
-                    color: done ? '#fff' : '#33466b',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: FONT_TEXT,
-                    fontWeight: 700,
-                  }}
-                >
-                  <div style={{fontSize: 22, opacity: 0.85}}>Cuota</div>
-                  <div style={{fontSize: 40}}>{n}</div>
-                  <div style={{fontSize: 24, height: 26}}>{done ? '✓' : ''}</div>
-                </div>
-              );
-            })}
-          </div>
+        <div style={{position: 'absolute', top: 222, left: 0, right: 0, textAlign: 'center', fontFamily: FONT_TEXT, fontWeight: 800, fontSize: 28, color: '#33466b'}}>
+          {option === 2 ? 'Meses completados' : 'Cuotas completadas'}: {Math.round(paid)} / 24
+        </div>
+        <div style={{position: 'absolute', top: 272, left: 28, right: 28, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10}}>
+          {cells.map((n) => {
+            const done = paid >= n - 0.01;
+            return (
+              <div
+                key={n}
+                style={{
+                  height: 78,
+                  borderRadius: 16,
+                  background: done ? (option === 2 ? '#2f6fd6' : BLUE) : '#fff',
+                  border: `3px solid ${done ? BLUE : '#c9d5ea'}`,
+                  color: done ? '#fff' : '#33466b',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: FONT_TEXT,
+                  fontWeight: 800,
+                }}
+              >
+                <div style={{fontSize: 18, opacity: 0.85}}>{option === 2 ? 'Mes' : 'Cuota'}</div>
+                <div style={{fontSize: 32, lineHeight: 1}}>{n}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -209,52 +228,50 @@ export const PanderoCommercial: React.FC = () => {
 
   // presenter
   const m = mouthAt(s);
-  const blinkF = [1.8, 5.2, 9.9, 13.6, 17.4, 22.3, 26.0, 30.9, 35.2, 38.8].some((b) => s >= b && s < b + 0.13) ? 1 : 0;
+  const blinkF = [1.8, 5.2, 9.9, 13.6, 17.4, 22.3, 26.0, 30.9, 35.2, 39.6, 43.4, 47.1].some((b) => s >= b && s < b + 0.13) ? 1 : 0;
   const point = Math.max(
-    prog(s, wordAt('s2', 3), wordAt('s2', 4)) * (1 - prog(s, wordAt('s2', 6), wordAt('s2', 7))),
-    prog(s, wordAt('s3', 1), wordAt('s3', 2)) * (1 - prog(s, wordAt('s3', 12), wordAt('s3', 13))),
-    prog(s, wordAt('s4', 5), wordAt('s4', 6)) * (1 - prog(s, wordAt('s4', 10), wordAt('s4', 11))),
+    prog(s, wordAt('s2', 0), wordAt('s2', 1)) * (1 - prog(s, wordAt('s2', 19), wordAt('s2', 19, 'end'))),
+    prog(s, wordAt('s3', 0), wordAt('s3', 1)) * (1 - prog(s, wordAt('s3', 16), wordAt('s3', 17))),
+    prog(s, wordAt('s4', 7), wordAt('s4', 8)) * (1 - prog(s, wordAt('s4', 13), wordAt('s4', 14))),
   );
   const nod = Math.max(...SCENES.flatMap((k) => (VOICE[k].words as Word[]).map((w, i) => (i % 4 === 0 ? Math.max(0, 1 - Math.abs(s - (S[k].voiceAt + w.start)) / 0.25) : 0))));
   const presenterIn = sp(0.15);
 
   // camera follows the focus of each scene
   let zoom = 1;
-  let ox = 540;
+  const ox = 540;
   let oy = 760;
   if (sc === 's1') zoom = interpolate(s, [0, S.s1.end], [1, 1.05]);
   if (sc === 's2') {
-    zoom = interpolate(s, [S.s2.start, S.s2.start + 1.2, S.s2.end], [0.9, 1.08, 1.12], {extrapolateRight: 'clamp'});
+    zoom = interpolate(s, [S.s2.start, S.s2.start + 1.2, S.s2.end], [0.9, 1.06, 1.1], {extrapolateRight: 'clamp'});
     oy = 680;
   }
-  if (sc === 's3') zoom = interpolate(s, [S.s3.start, S.s3.end], [1, 1.03]);
 
-  // scene 1
+  // scene 1: welcome with the car
   const s1Car = sp(S.s1.start + 0.2);
-  const nameReveal = prog(s, wordAt('s1', 5) - 0.1, wordAt('s1', 5) + 0.5);
-  const priceReveal = prog(s, wordAt('s1', 11) - 0.05, wordAt('s1', 11) + 0.5);
+  const nameReveal = prog(s, wordAt('s1', 2) - 0.1, wordAt('s1', 2) + 0.5);
 
-  // scene 2
+  // scene 2: two ways to pay
+  const option = s >= wordAt('s2', 9) - 0.1 ? 2 : 1;
+  const paid =
+    option === 1
+      ? interpolate(s, [wordAt('s2', 4), wordAt('s2', 8, 'end')], [0, 24], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})
+      : interpolate(s, [wordAt('s2', 10), wordAt('s2', 19, 'end')], [0, 24], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const phoneIn = sp(S.s2.start + 0.1);
-  const paid = interpolate(s, [wordAt('s2', 4), wordAt('s2', 8)], [0, 24], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const scroll = prog(s, wordAt('s2', 6), wordAt('s2', 8) - 0.2);
-  const badge = prog(s, wordAt('s2', 8), wordAt('s2', 8) + 0.45);
+  const optLabel = prog(s, wordAt('s2', 3) - 0.1, wordAt('s2', 3) + 0.4);
 
-  // scene 3: the "24 cuotas pagadas" box grows into the steps panel
-  const morph = prog(s, S.s3.start, S.s3.start + 0.7);
-  const step1 = prog(s, wordAt('s3', 2) - 0.3, wordAt('s3', 2) + 0.2);
-  const step2 = prog(s, wordAt('s3', 7) - 0.3, wordAt('s3', 7) + 0.2);
-  const note = prog(s, wordAt('s3', 13) - 0.2, wordAt('s3', 13) + 0.4);
+  // scene 3: steps, then the car comes back on "llevarte tu auto"
+  const carBack = wordAt('s3', 24) - 0.15;
+  const stepsOut = prog(s, carBack - 0.1, carBack + 0.4);
+  const step1 = prog(s, wordAt('s3', 1) - 0.2, wordAt('s3', 1) + 0.3);
+  const req = prog(s, wordAt('s3', 6) - 0.2, wordAt('s3', 6) + 0.3);
+  const step2 = prog(s, wordAt('s3', 12) - 0.2, wordAt('s3', 12) + 0.3);
+  const done2 = prog(s, wordAt('s3', 20) - 0.2, wordAt('s3', 20) + 0.3);
+  const s3Car = spring({frame: frame - Math.round(carBack * fps), fps, config: {damping: 16, stiffness: 120}});
+  const keep = prog(s, wordAt('s3', 28) - 0.2, wordAt('s3', 28) + 0.4);
 
   // scene 4
-  const s4Car = sp(S.s4.start + 0.15);
-  const s4Text = prog(s, S.s4.start + 0.6, S.s4.start + 1.2);
-  const wa = prog(s, S.s4.start + 1.0, S.s4.start + 1.5);
-
-  const badgeBox =
-    sc === 's3'
-      ? {left: interpolate(morph, [0, 1], [300, 90]), top: interpolate(morph, [0, 1], [1150, 360]), width: interpolate(morph, [0, 1], [500, 900]), height: interpolate(morph, [0, 1], [96, 760])}
-      : {left: 300, top: 1150, width: 500, height: 96};
+  const s4Text = prog(s, S.s4.start + 0.4, S.s4.start + 1.0);
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
@@ -265,58 +282,65 @@ export const PanderoCommercial: React.FC = () => {
           <>
             <LogoCard s={s} show={sp(0)} />
             <Car x={40 + (1 - s1Car) * 1100} y={520} w={1000} />
-            {CONFIG.showPrice ? (
-              <Reveal p={priceReveal} style={{position: 'absolute', left: 90, top: 960, width: 900}}>
-                <div style={{background: RED, borderRadius: 22, padding: '22px 30px', color: '#fff', fontFamily: FONT, fontSize: 52, textAlign: 'center'}}>{CONFIG.priceText}</div>
-              </Reveal>
-            ) : (
-              <Reveal p={nameReveal} style={{position: 'absolute', left: 140, top: 960, width: 800}}>
-                <div style={{background: '#fff', borderRadius: 22, padding: '18px 30px', borderLeft: `16px solid ${RED}`, fontFamily: FONT_TEXT}}>
-                  <div style={{fontSize: 52, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
-                  <div style={{fontSize: 34, fontWeight: 700, color: '#33466b'}}>Asesor vehicular · Pandero Auto</div>
-                </div>
-              </Reveal>
-            )}
+            <Reveal p={nameReveal} style={{position: 'absolute', left: 140, top: 960, width: 800}}>
+              <div style={{background: '#fff', borderRadius: 22, padding: '18px 30px', borderLeft: `16px solid ${RED}`, fontFamily: FONT_TEXT}}>
+                <div style={{fontSize: 52, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
+                <div style={{fontSize: 34, fontWeight: 700, color: '#33466b'}}>{CONFIG.role}</div>
+              </div>
+            </Reveal>
           </>
         )}
 
-        {sc === 's2' && <div style={{transform: `translateY(${(1 - phoneIn) * 1200}px)`}}><Phone s={s} paid={paid} scroll={scroll} /></div>}
-
-        {(sc === 's2' || sc === 's3') && (badge > 0 || sc === 's3') && (
-          <div style={{position: 'absolute', ...badgeBox, borderRadius: 30, background: sc === 's3' ? 'rgba(255,255,255,0.08)' : RED, border: sc === 's3' ? '3px solid rgba(255,255,255,0.35)' : 'none', clipPath: sc === 's2' ? `inset(0 ${100 - badge * 100}% 0 0 round 30px)` : undefined, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 16px 40px rgba(0,0,0,0.35)'}}>
-            {sc === 's2' && <div style={{color: '#fff', fontFamily: FONT, fontSize: 40}}>24 cuotas pagadas</div>}
-          </div>
+        {sc === 's2' && (
+          <>
+            <div style={{transform: `translateY(${(1 - phoneIn) * 1200}px)`}}>
+              <Phone option={option} paid={paid} />
+            </div>
+            <Reveal p={optLabel} style={{position: 'absolute', left: 300, top: 1140, width: 500}}>
+              <div style={{background: option === 1 ? RED : '#ffffff', color: option === 1 ? '#fff' : BLUE, borderRadius: 30, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontSize: 34}}>
+                {option === 1 ? 'Opción 1: adelantar' : 'Opción 2: 1 cuota al mes'}
+              </div>
+            </Reveal>
+          </>
         )}
 
         {sc === 's3' && (
           <>
-            <Reveal p={morph} style={{position: 'absolute', left: 120, top: 390, width: 840}}>
-              <div style={{color: '#fff', fontFamily: FONT_TEXT, fontWeight: 800, fontSize: 40, opacity: 0.9}}>Después de adjudicar</div>
-            </Reveal>
-            <StepCard n={1} title="Adjudicación del certificado" active={step1} reveal={prog(s, S.s3.start + 0.5, S.s3.start + 1.0)} icon={<svg width={64} height={64} viewBox="0 0 64 64"><rect x={10} y={8} width={44} height={50} rx={6} fill="#fff" /><rect x={18} y={18} width={28} height={5} fill={RED} /><rect x={18} y={29} width={28} height={4} fill={BLUE} /><rect x={18} y={38} width={20} height={4} fill={BLUE} /></svg>} />
-            <StepCard n={2} title="Trámites de entrega" active={step2} reveal={prog(s, S.s3.start + 0.8, S.s3.start + 1.3)} icon={<svg width={64} height={64} viewBox="0 0 64 64"><circle cx={22} cy={32} r={12} fill="none" stroke="#fff" strokeWidth={6} /><rect x={32} y={29} width={26} height={6} fill="#fff" /><rect x={48} y={35} width={6} height={10} fill="#fff" /></svg>} />
-            <Reveal p={note} style={{position: 'absolute', left: 170, top: 1010, width: 740}}>
-              <div style={{background: RED, color: '#fff', borderRadius: 40, padding: '16px 26px', fontFamily: FONT_TEXT, fontWeight: 800, fontSize: 34, textAlign: 'center'}}>Continúas pagando las cuotas pendientes</div>
-            </Reveal>
+            <div style={{opacity: 1 - stepsOut, transform: `translateX(${-stepsOut * 300}px)`}}>
+              <Reveal p={prog(s, S.s3.start, S.s3.start + 0.6)} style={{position: 'absolute', left: 120, top: 330, width: 840}}>
+                <div style={{color: '#fff', fontFamily: FONT_TEXT, fontWeight: 800, fontSize: 42}}>Pasos para llevarte tu auto</div>
+              </Reveal>
+              <StepCard n={1} title="24 cuotas completadas" active={step1 * (1 - step2)} reveal={prog(s, S.s3.start + 0.2, S.s3.start + 0.7)} icon={<div style={{color: '#fff', fontFamily: FONT, fontSize: 40}}>24</div>} />
+              <Reveal p={req} style={{position: 'absolute', left: 180, top: 700, width: 720}}>
+                <div style={{color: '#fff', fontFamily: FONT_TEXT, fontWeight: 700, fontSize: 32, textAlign: 'center'}}>+ requisitos del plan cumplidos</div>
+              </Reveal>
+              <StepCard n={2} title={done2 > 0.5 ? 'Trámites terminados ✓' : 'Trámites de entrega'} active={step2} reveal={prog(s, wordAt('s3', 11) - 0.3, wordAt('s3', 11) + 0.2)} icon={<svg width={64} height={64} viewBox="0 0 64 64"><rect x={10} y={8} width={44} height={50} rx={6} fill="#fff" /><rect x={18} y={18} width={28} height={5} fill={RED} /><rect x={18} y={29} width={28} height={4} fill={BLUE} /><rect x={18} y={38} width={20} height={4} fill={BLUE} /></svg>} />
+            </div>
+            {s >= carBack && (
+              <>
+                <Reveal p={prog(s, carBack, carBack + 0.5)} style={{position: 'absolute', left: 140, top: 330, width: 800}}>
+                  <div style={{color: '#fff', fontFamily: FONT, fontSize: 58, textAlign: 'center'}}>¡Te llevas tu auto!</div>
+                </Reveal>
+                <Car x={40 + (1 - s3Car) * 1100} y={470} w={1000} />
+                <Reveal p={keep} style={{position: 'absolute', left: 150, top: 900, width: 780}}>
+                  <div style={{background: RED, color: '#fff', borderRadius: 40, padding: '16px 26px', fontFamily: FONT_TEXT, fontWeight: 800, fontSize: 34, textAlign: 'center'}}>Sigues pagando las cuotas que te quedan</div>
+                </Reveal>
+              </>
+            )}
           </>
         )}
 
         {sc === 's4' && (
           <>
             <LogoCard s={s} show={sp(S.s4.start)} />
-            <Car x={40 - (1 - s4Car) * 1100} y={400} w={1000} />
-            <Reveal p={s4Text} style={{position: 'absolute', left: 90, top: 805, width: 900, textAlign: 'center'}}>
-              <div style={{fontFamily: FONT_TEXT, color: '#fff'}}>
-                <div style={{fontSize: 54, fontWeight: 900}}>{CONFIG.advisor}</div>
-                <div style={{fontSize: 34, fontWeight: 700, opacity: 0.9}}>{CONFIG.role}</div>
-              </div>
-            </Reveal>
-            <Reveal p={wa} style={{position: 'absolute', left: 110, top: 955, width: 860}}>
-              <div style={{background: '#25d366', borderRadius: 34, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22, boxShadow: '0 18px 40px rgba(0,0,0,0.35)'}}>
-                <svg width={84} height={84} viewBox="0 0 64 64"><circle cx={32} cy={32} r={26} fill="#fff" /><path d="M 14 54 L 18 41 Q 12 29 20 19" stroke="#fff" strokeWidth={6} fill="none" /><path d="M 24 22 Q 22 30 30 38 Q 38 46 44 42 L 40 36 L 36 38 Q 30 34 28 28 L 30 24 Z" fill="#25d366" /></svg>
-                <div style={{fontFamily: FONT_TEXT, color: '#fff'}}>
-                  <div style={{fontSize: 30, fontWeight: 800}}>WhatsApp</div>
-                  <div style={{fontSize: 80, fontWeight: 900, lineHeight: 1}}>{CONFIG.whatsapp}</div>
+            <Car x={40} y={400} w={1000} />
+            <Reveal p={s4Text} style={{position: 'absolute', left: 60, top: 820, width: 960}}>
+              <div style={{background: '#fff', borderRadius: 34, padding: '22px 20px', textAlign: 'center', boxShadow: '0 18px 40px rgba(0,0,0,0.35)', borderBottom: `10px solid ${RED}`}}>
+                <div style={{fontFamily: FONT_TEXT, fontSize: 54, fontWeight: 900, color: BLUE}}>{CONFIG.advisor}</div>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginTop: 6}}>
+                  <svg width={70} height={70} viewBox="0 0 64 64"><circle cx={32} cy={32} r={28} fill="#25d366" /><path d="M 22 20 Q 18 30 28 40 Q 38 50 46 44 L 42 37 L 37 39 Q 31 35 28 29 L 30 25 Z" fill="#fff" /></svg>
+                  <div style={{fontFamily: FONT_TEXT, fontSize: 30, fontWeight: 800, color: '#1d8f4a'}}>WhatsApp</div>
+                  <div style={{fontFamily: FONT_TEXT, fontSize: 76, fontWeight: 900, color: '#0d1b38'}}>{CONFIG.whatsapp}</div>
                 </div>
               </div>
             </Reveal>

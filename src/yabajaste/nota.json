@@ -1,0 +1,13 @@
+{
+  "file": "yabajaste/voz/nota_grabacion.wav",
+  "voiceAt": 0.0,
+  "keys": 4.45,
+  "click": 5.2,
+  "length": 5.35,
+  "subs": [
+    { "a": 0.05, "b": 1.05, "text": "Ya bajo." },
+    { "a": 1.3, "b": 2.55, "text": "Oye… si sale mi mamá," },
+    { "a": 2.65, "b": 4.5, "text": "dile que recién llegas, ¿ya?" }
+  ],
+  "mamaEnd": 2.45
+}

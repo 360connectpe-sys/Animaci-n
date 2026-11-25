@@ -14,14 +14,14 @@ OUT = Path(__file__).resolve().parents[2] / "public" / "yabajaste" / "voz"
 EL, ELLA = "es-PE-AlexNeural", "es-PE-CamilaNeural"
 # id: (voz, texto, rate, pitch)
 LINES = {
-    "n1": (EL, "Hoy pasé por tu cuadra. La panadería sigue con medio letrero apagado.", "-6%", "+0Hz"),
-    "n2": (EL, "Abrí nuestro chat y busqué: ¿ya bajaste? Me salieron un montón. Parece que escribí eso todos los sábados.", "-6%", "+0Hz"),
+    "n1": (EL, "Hoy el micro pasó por tu cuadra. Sigue apagada la mitad del letrero de la panadería.", "-6%", "+0Hz"),
+    "n2": (EL, "Busqué: ya bajaste, en nuestro chat. Me salieron un montón. Creo que te escribí lo mismo todos los sábados.", "-6%", "+0Hz"),
     "nota": (ELLA, "Ya bajo. Oye... si sale mi mamá, dile que recién llegas, ¿ya?", "+14%", "+6Hz"),
     "r1": (EL, "¿Recién llego? Ya hasta me conoce el panadero.", "+2%", "+2Hz"),
     "r2": (ELLA, "Entonces ya sabes cuál me gusta.", "+6%", "+5Hz"),
     "n3": (EL, "Siempre hacías eso. Me ponías la mano acá, y yo ya sabía que tenía que quedarme quieto.", "-8%", "+0Hz"),
-    "n4": (EL, "Cuando terminamos, me acordaba mucho de la última pelea. Hasta me sabía de memoria qué había dicho cada uno.", "-8%", "-1Hz"),
-    "n5": (EL, "Hoy me acordé de esos veinte minutos afuera de tu casa. Con el pan todavía caliente, esperando que bajaras.", "-10%", "+0Hz"),
+    "n4": (EL, "Me acuerdo de que esa noche miré la hora tres veces. Veinte minutos esperándote, con el pan todavía caliente.", "-8%", "-1Hz"),
+    "n5": (EL, "Quién me iba a decir que un día iba a extrañar hasta la parte en que todavía no bajabas.", "-10%", "+0Hz"),
 }
 
 async def main():

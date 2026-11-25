@@ -16,8 +16,10 @@
     "pandero:music": "python3 tools/pandero/music.py 86",
     "yabajaste:studio": "remotion studio src/yabajaste/index.ts",
     "yabajaste:tts": "python3 tools/yabajaste/tts.py",
-    "yabajaste:audio": "python3 -I tools/yabajaste/audio.py",
-    "yabajaste:prueba": "remotion render src/yabajaste/index.ts YaBajastePrueba out/yabajaste_prueba.mp4 --crf=18"
+    "yabajaste:audio": "python3 -I tools/yabajaste/audio.py nota lips corto",
+    "yabajaste:prueba": "remotion render src/yabajaste/index.ts YaBajastePrueba out/yabajaste_prueba.mp4 --crf=18",
+    "yabajaste:timeline": "python3 -I tools/yabajaste/timeline.py",
+    "yabajaste:render": "remotion render src/yabajaste/index.ts YaBajaste out/Ya_bajaste_completo.mp4 --crf=18 --audio-bitrate=256k"
   },
   "repository": {
     "type": "git",

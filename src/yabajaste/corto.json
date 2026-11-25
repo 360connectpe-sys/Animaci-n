@@ -1,0 +1,315 @@
+{
+ "fps": 30,
+ "total": 75.52,
+ "t": {
+  "sign": 5.4,
+  "eyes": 4.3,
+  "s1_end": 8.903,
+  "s2a": 8.903,
+  "phone_out": 9.453,
+  "s2b": 10.403,
+  "type_a": 10.653,
+  "type_b": 11.653,
+  "results": 12.958,
+  "scroll_a": 13.763,
+  "scroll_b": 15.839,
+  "finger_in": 18.728,
+  "hover": 19.428,
+  "tap": 19.978,
+  "s3b": 20.796,
+  "mama": 22.578,
+  "keys": 24.578,
+  "click": 25.328,
+  "s4a": 24.828,
+  "s4b": 25.878,
+  "door": 25.978,
+  "out": 26.478,
+  "back": 28.178,
+  "bagLook": 29.278,
+  "follow": 29.628,
+  "offer": 29.928,
+  "s4c": 30.678,
+  "reach": 34.881,
+  "take": 35.381,
+  "bite": 35.831,
+  "chewEnd": 37.131,
+  "lookUp": 37.231,
+  "serious": 39.336,
+  "laugh": 39.986,
+  "s4_end": 41.986,
+  "s5a": 41.986,
+  "walk_a": 42.186,
+  "walk_b": 43.186,
+  "lace": 43.436,
+  "touch": 43.936,
+  "swap": 44.186,
+  "brace": 44.686,
+  "lookHer": 45.036,
+  "tie": 44.936,
+  "s5b": 46.826,
+  "s5_end": 52.443,
+  "s6a": 52.443,
+  "bump": 53.443,
+  "fix": 53.893,
+  "s6b": 54.943,
+  "lookBack": 55.243,
+  "lookDown": 64.768,
+  "paxUp": 68.718,
+  "s6_end": 71.925,
+  "s7a": 71.925,
+  "tap2": 72.675,
+  "s7b": 73.125,
+  "doorOpen": 73.375,
+  "black": 74.97,
+  "total": 75.52
+ },
+ "voices": {
+  "n1": 1.9,
+  "n2": 9.803,
+  "nota": 20.128,
+  "r1": 30.828,
+  "r2": 37.531,
+  "n3": 44.536,
+  "n4": 55.643,
+  "n5": 65.518,
+  "nota2": 72.825
+ },
+ "shots": [
+  {
+   "name": "1 · La cuadra",
+   "kind": "busWide",
+   "a": 0.0,
+   "b": 8.903
+  },
+  {
+   "name": "2 · Saca el celular",
+   "kind": "busMedium",
+   "a": 8.903,
+   "b": 10.403
+  },
+  {
+   "name": "2 · El chat",
+   "kind": "chat",
+   "a": 10.403,
+   "b": 20.796
+  },
+  {
+   "name": "3 · Su reflejo",
+   "kind": "reflejo",
+   "a": 20.796,
+   "b": 24.828
+  },
+  {
+   "name": "4 · La manija verde",
+   "kind": "manija",
+   "a": 24.828,
+   "b": 25.878
+  },
+  {
+   "name": "4 · La puerta",
+   "kind": "vereda",
+   "a": 25.878,
+   "b": 30.678
+  },
+  {
+   "name": "4 · Recién llegas",
+   "kind": "dialogo",
+   "a": 30.678,
+   "b": 34.781
+  },
+  {
+   "name": "4 · El pan",
+   "kind": "pan",
+   "a": 34.781,
+   "b": 37.281
+  },
+  {
+   "name": "4 · Cuál me gusta",
+   "kind": "dialogo2",
+   "a": 37.281,
+   "b": 41.986
+  },
+  {
+   "name": "5 · Dos pasos",
+   "kind": "pasos",
+   "a": 41.986,
+   "b": 46.826
+  },
+  {
+   "name": "5 · La mano en el hombro",
+   "kind": "mano",
+   "a": 46.826,
+   "b": 52.443
+  },
+  {
+   "name": "6 · La tira de la mochila",
+   "kind": "tira",
+   "a": 52.443,
+   "b": 54.943
+  },
+  {
+   "name": "6 · Los veinte minutos",
+   "kind": "busBack",
+   "a": 54.943,
+   "b": 64.968
+  },
+  {
+   "name": "6 · El audio terminó",
+   "kind": "audioFin",
+   "a": 64.968,
+   "b": 67.718
+  },
+  {
+   "name": "6 · Junto a la ventana",
+   "kind": "busWait",
+   "a": 67.718,
+   "b": 71.925
+  },
+  {
+   "name": "7 · El pulgar",
+   "kind": "pulgar",
+   "a": 71.925,
+   "b": 73.125
+  },
+  {
+   "name": "7 · Otra vez",
+   "kind": "busEnd",
+   "a": 73.125,
+   "b": 74.97
+  },
+  {
+   "name": "Negro",
+   "kind": "black",
+   "a": 74.97,
+   "b": 75.52
+  }
+ ],
+ "subs": [
+  {
+   "a": 1.958,
+   "b": 4.368,
+   "text": "Hoy el micro pasó por tu cuadra.",
+   "who": "el"
+  },
+  {
+   "a": 5.073,
+   "b": 8.553,
+   "text": "Sigue apagada la mitad\ndel letrero de la panadería.",
+   "who": "el"
+  },
+  {
+   "a": 9.861,
+   "b": 13.008,
+   "text": "Busqué «ya bajaste»\nen nuestro chat.",
+   "who": "el"
+  },
+  {
+   "a": 13.713,
+   "b": 15.589,
+   "text": "Me salieron un montón.",
+   "who": "el"
+  },
+  {
+   "a": 16.286,
+   "b": 19.578,
+   "text": "Creo que te escribí lo mismo\ntodos los sábados.",
+   "who": "el"
+  },
+  {
+   "a": 20.168,
+   "b": 21.026,
+   "text": "Ya bajo.",
+   "who": "ella"
+  },
+  {
+   "a": 21.404,
+   "b": 22.719,
+   "text": "Oye… si sale mi mamá,",
+   "who": "ella"
+  },
+  {
+   "a": 22.759,
+   "b": 24.555,
+   "text": "dile que recién llegas, ¿ya?",
+   "who": "ella"
+  },
+  {
+   "a": 30.881,
+   "b": 32.1,
+   "text": "¿Recién llego?",
+   "who": "el"
+  },
+  {
+   "a": 32.723,
+   "b": 34.781,
+   "text": "Ya hasta me conoce el panadero.",
+   "who": "el"
+  },
+  {
+   "a": 37.574,
+   "b": 39.536,
+   "text": "Entonces ya sabes cuál me gusta.",
+   "who": "ella"
+  },
+  {
+   "a": 44.595,
+   "b": 46.298,
+   "text": "Siempre hacías eso.",
+   "who": "el"
+  },
+  {
+   "a": 47.026,
+   "b": 48.817,
+   "text": "Me ponías la mano acá",
+   "who": "el"
+  },
+  {
+   "a": 48.857,
+   "b": 51.993,
+   "text": "y yo ya sabía que tenía\nque quedarme quieto.",
+   "who": "el"
+  },
+  {
+   "a": 55.702,
+   "b": 59.443,
+   "text": "Me acuerdo de que esa noche\nmiré la hora tres veces.",
+   "who": "el"
+  },
+  {
+   "a": 60.171,
+   "b": 62.169,
+   "text": "Veinte minutos esperándote,",
+   "who": "el"
+  },
+  {
+   "a": 62.209,
+   "b": 64.518,
+   "text": "con el pan todavía caliente.",
+   "who": "el"
+  },
+  {
+   "a": 65.578,
+   "b": 67.456,
+   "text": "Quién me iba a decir que un día",
+   "who": "el"
+  },
+  {
+   "a": 67.496,
+   "b": 71.675,
+   "text": "iba a extrañar hasta la parte\nen que todavía no bajabas.",
+   "who": "el"
+  },
+  {
+   "a": 72.865,
+   "b": 73.723,
+   "text": "Ya bajo.",
+   "who": "ella"
+  },
+  {
+   "a": 74.101,
+   "b": 74.67,
+   "text": "Oye…",
+   "who": "ella"
+  }
+ ]
+}

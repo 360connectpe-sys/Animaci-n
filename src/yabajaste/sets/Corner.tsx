@@ -22,7 +22,7 @@ export const BakerySign: React.FC<{ x: number; y: number; s?: number; t: number;
   );
 };
 
-const Bread: React.FC<{ x: number; y: number; s?: number; r?: number }> = ({ x, y, s = 1, r = 0 }) => (
+export const Bread: React.FC<{ x: number; y: number; s?: number; r?: number }> = ({ x, y, s = 1, r = 0 }) => (
   <g transform={`translate(${x},${y}) rotate(${r}) scale(${s})`}>
     <ellipse cx={0} cy={0} rx={34} ry={20} fill="#d9934a" stroke={OL} strokeWidth={4} />
     <path d="M-16,-8 Q0,-16 16,-8" stroke="#a8682c" strokeWidth={4} fill="none" strokeLinecap="round" />

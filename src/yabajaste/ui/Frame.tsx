@@ -42,7 +42,7 @@ export const Subtitle: React.FC<{ text: string; who: "el" | "ella"; y?: number; 
       fontFamily: FONT, fontWeight: 600, fontSize: 58, lineHeight: 1.18, textAlign: "center",
       color: who === "ella" ? "#ffd9c7" : "#ffffff", fontStyle: who === "ella" ? "italic" : "normal",
       background: "rgba(10,12,20,0.58)", padding: "14px 30px 18px", borderRadius: 26, maxWidth: 900,
-      textShadow: "0 3px 0 rgba(0,0,0,0.35)",
+      textShadow: "0 3px 0 rgba(0,0,0,0.35)", whiteSpace: "pre-line",
     }}>{text}</div>
   </div>
 );

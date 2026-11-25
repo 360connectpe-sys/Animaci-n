@@ -34,7 +34,9 @@ export type BeanProps = {
   puff?: number;                          // nose-laugh puff 0..1
   blush?: boolean; noLegs?: boolean; noShadow?: boolean; breath?: number; bob?: number;
   open?: number;                          // mouth open level for lines (0..2)
-  headBack?: boolean;                     // head turned the other way (looks behind), body stays
+  headBack?: boolean;
+  lean?: number;                          // upper body leans (deg, positive = toward its front)
+  lace?: number;                          // loose lace on the left sneaker (0..1 = how much it swings)                     // head turned the other way (looks behind), body stays
 };
 
 const POSE: Record<ArmName, [number, number]> = {
@@ -196,10 +198,11 @@ const Mouth: React.FC<{ e: Expr; open: number; T: number }> = ({ e, open, T }) =
   }
 };
 
-const Shoe: React.FC<{ x: number; y: number; dir: 1 | -1; c: string; off?: number }> = ({ x, y, dir, c, off = 0 }) => (
+const Shoe: React.FC<{ x: number; y: number; dir: 1 | -1; c: string; off?: number; lace?: number; T?: number }> = ({ x, y, dir, c, off = 0, lace = 0, T = 0 }) => (
   <g transform={`translate(${x},${y}) rotate(${off * -16 * dir})`}>
     <path d={`M ${-10 * dir},-12 C ${-14 * dir},2 ${-12 * dir},6 0,6 L ${30 * dir},6 C ${38 * dir},6 ${38 * dir},-6 ${28 * dir},-10 C ${18 * dir},-14 ${8 * dir},-18 ${-10 * dir},-12 Z`} fill={c} stroke={OL} strokeWidth={4} strokeLinejoin="round" />
     <path d={`M ${-12 * dir},2 L ${32 * dir},2`} stroke={shade(c, 0.78)} strokeWidth={4} />
+    {lace > 0 ? <path d={`M ${10 * dir},-12 q ${8 * dir},${10 + Math.sin(T * 6) * 4 * lace} ${18 * dir},${14} M ${10 * dir},-12 q ${-4 * dir},${12} ${2 * dir},${20 + Math.cos(T * 5) * 3 * lace}`} stroke="#f4f1ea" strokeWidth={3} fill="none" strokeLinecap="round" /> : null}
   </g>
 );
 
@@ -218,7 +221,7 @@ export const Bean: React.FC<BeanProps> = (p) => {
   const s = p.s ?? 1;
   const flip = p.flip ? -1 : 1;
   const armW = 7;
-  const fx = (p.turn ?? look * 0.6) * 16;
+  const fx = (p.turn ?? look * 0.6) * 28;
   const dip = p.dipR ?? 0;
   const puff = p.puff ?? 0;
   return (
@@ -229,10 +232,10 @@ export const Bean: React.FC<BeanProps> = (p) => {
         const a = rad(ang) * sd;
         const hx = sd * 15, fx2 = hx + Math.sin(a) * 62, fy = -60 + Math.cos(a) * 62;
         return <g key={sd}><path d={`M${hx},-62 L${fx2},${fy}`} stroke={OL} strokeWidth={armW} strokeLinecap="round" />
-          {p.shoes ? <Shoe x={fx2} y={fy} dir={sd === -1 ? -1 : 1} c={p.shoes} off={sd === -1 ? p.shoeOffL : 0} />
+          {p.shoes ? <Shoe x={fx2} y={fy} dir={sd === -1 ? -1 : 1} c={p.shoes} off={sd === -1 ? p.shoeOffL : 0} lace={sd === -1 ? p.lace : 0} T={T} />
             : <path d={`M${fx2},${fy} L${fx2 + sd * 10},${fy}`} stroke={OL} strokeWidth={armW} strokeLinecap="round" />}</g>;
       })}
-      <g transform={`scale(1,${breathe})`} style={{ transformOrigin: "0px -55px" }}>
+      <g transform={`rotate(${p.lean ?? 0},0,-60)`}><g transform={`scale(1,${breathe})`} style={{ transformOrigin: "0px -55px" }}>
         <Outfit kind={outfit} color={color} id={uid} strap={p.strap} />
         <Limb side={-1} pose={p.armL ?? "down"} T={T} skin={skin} seed={seed} w={armW}>{p.holdL}</Limb>
         <Limb side={1} pose={p.armR ?? "down"} T={T} skin={skin} seed={seed + 1} w={armW} dip={dip}>{p.holdR}</Limb>
@@ -255,7 +258,7 @@ export const Bean: React.FC<BeanProps> = (p) => {
           </g>
           <HairFront kind={p.hair ?? "short"} c={hairC} />
         </g>
-      </g>
+      </g></g>
     </g>
   );
 };

@@ -177,13 +177,29 @@ def place_mono(buf, x, t):
         buf[k:k + m] += x[:m]
 
 
+def limit(x, ceil, att=0.001, rel=0.08):
+    """peak limiter (from the plugin's mix.py): smooth gain so |x| <= ceil, 2 ms look-ahead"""
+    from scipy.ndimage import minimum_filter1d
+    from scipy.signal import lfilter
+    a = np.abs(x).max(0)
+    need = np.minimum(1.0, ceil / np.maximum(a, 1e-9))
+    la = int(0.002 * SR)
+    need = minimum_filter1d(need, 2 * la + 1)
+    kr = np.exp(-1 / (rel * SR))
+    # release smoothing (attack is instant thanks to the min filter)
+    g = lfilter([1 - kr], [1, -kr], need - 1.0, zi=[0.0])[0] + 1.0
+    g = np.minimum(g, need)
+    return x * g
+
+
 def finish(mix, path, target=-16.0):
     """one gain to the target loudness, soft limiter at -1 dBFS"""
-    g = dbg(target - integrated(mix))
-    mix = mix * g
-    peak = np.abs(mix).max()
-    if peak > dbg(-1.2):
-        mix = np.tanh(mix / dbg(-1.2)) * dbg(-1.2)
+    for _ in range(3):                      # gain to target, then a look-ahead peak limiter at -1.5 dBFS
+        mix = mix * dbg(target - integrated(mix))
+        mix = limit(mix, dbg(-1.5))
+    tp = true_peak(mix)
+    if tp > -1.0:
+        mix = mix * dbg(-1.1 - tp)
     write_wav(str(path), mix)
     print(path.name, "LUFS", round(integrated(mix), 1), "TP", round(true_peak(mix), 1))
 
@@ -219,9 +235,122 @@ def build_prueba():
     finish(mix, PUB / "mix_prueba.wav")
 
 
+# ------------------------------------------------------------------ lips for the sidewalk dialogue
+def build_lips():
+    """mouth level per frame (0, 1, 2) from the voice envelope of r1 and r2"""
+    out = {}
+    for k in ("r1", "r2"):
+        x = load_mp3(PUB / "voz" / f"{k}.mp3")
+        hop = SR // 30
+        env = np.array([np.sqrt(np.mean(x[i:i + hop] ** 2)) for i in range(0, len(x), hop)])
+        ref = np.percentile(env[env > 1e-4], 90)
+        lv = np.where(env > ref * 0.45, 2, np.where(env > ref * 0.14, 1, 0))
+        out[k] = [int(v) for v in lv]
+    (SRC / "lips.json").write_text(json.dumps(out))
+    print("lips.json", {k: len(v) for k, v in out.items()})
+
+
+def bump(r):
+    x = modal(0.5, [(55, 1, 0.12), (110, 0.5, 0.08), (240, 0.3, 0.05)], r)
+    x += 0.4 * bp(r.standard_normal(len(x)), 300, 3000) * np.exp(-tt(0.5) / 0.05)
+    rattle = bp(r.standard_normal(ns(0.5)), 1500, 4500) * (np.abs(np.sin(np.arange(ns(0.5)) / SR * 2 * np.pi * 22)) ** 6) * np.exp(-tt(0.5) / 0.18) * 0.5
+    return fades(x + rattle, 0.002, 0.05)
+
+
+def hiss(r, dur=0.8):
+    n = ns(dur)
+    return fades(hp(colored(n, r, 0.3), 2500) * np.exp(-tt(dur) / 0.25), 0.005, 0.1)
+
+
+def rustle(r, dur=0.5):
+    n = ns(dur)
+    return fades(bp(colored(n, r, 0.6), 400, 4000) * np.hanning(n) * (0.5 + 0.5 * np.abs(smooth_noise(n, r, 9))), 0.01, 0.05)
+
+
+def crunch(r):
+    imp = (r.random(ns(0.25)) < 300 / SR) * r.uniform(-1, 1, ns(0.25))
+    return fades(bp(imp, 900, 5000, 2) * np.exp(-tt(0.25) / 0.08) * 3, 0.001, 0.04)
+
+
+def build_corto():
+    Cj = json.loads((SRC / "corto.json").read_text())
+    t, V = Cj["t"], Cj["voices"]
+    r = rng(31)
+    dur = Cj["total"]
+    N = ns(dur)
+    voice = np.zeros((2, N))
+    beds = np.zeros((2, N))
+    fx = np.zeros((2, N))
+    # ---- voices
+    for k in ("n1", "n2", "n3", "n4", "n5"):
+        v = rms_norm(load_mp3(PUB / "voz" / f"{k}.mp3"), -21)
+        v = peq(v, 180, 1.5, 0.8)                    # close, intimate
+        place(voice, v, V[k])
+    porch = make_ir(0.35, 5, pre=0.006, hf=1.4)
+    for k, p in (("r1", -0.12), ("r2", 0.12)):
+        v = rms_norm(load_mp3(PUB / "voz" / f"{k}.mp3"), -21)
+        v = pan(v, p) + 0.10 * convolve_st(v, porch)
+        place(voice, v, V[k])
+    nota, _ = read_wav(str(PUB / "voz" / "nota_grabacion.wav"))
+    nota = nota[0] * 1.9
+    ear = curve(len(nota), [(0, 0.8), (t["s3b"] - V["nota"], 0.8), (t["s3b"] - V["nota"] + 0.6, 1.1)])
+    place(voice, nota * ear, V["nota"])
+    n2 = nota[: ns(t["black"] - V["nota2"])].copy()
+    n2[-ns(0.04):] *= np.linspace(1, 0, ns(0.04))
+    place(voice, n2, V["nota2"])
+    # ---- beds: the micro (present) and the corner (memory), crossfaded on the scene changes
+    bus = bus_bed(dur, r)
+    busg = curve(N, [(0, 0), (0.4, 1), (t["s4a"], 1), (t["s4a"] + 0.5, 0), (t["s6a"] - 0.15, 0), (t["s6a"] + 0.1, 1), (dur, 1)])
+    beds += bus * busg * 0.30
+    street = street_bed(dur, r)
+    stg = curve(N, [(0, 0), (t["s4a"], 0), (t["s4a"] + 0.4, 1), (t["s6a"] - 0.1, 1), (t["s6a"] + 0.1, 0), (dur, 0)])
+    beds += street * stg * 0.26
+    # ---- effects
+    place(fx, pan(rustle(r, 0.6), 0.1) * 0.25, t["phone_out"] - 0.2)
+    for i in range(10):
+        place(fx, pan(tap(r), 0.1) * 0.08, t["type_a"] + i * (t["type_b"] - t["type_a"]) / 10)
+    for i in range(14):
+        place(fx, pan(click(r, (3200, 5000, 7000), 0.004), 0.1) * 0.03, t["scroll_a"] + 0.15 + i * (t["scroll_b"] - t["scroll_a"] - 0.4) / 14)
+    place(fx, pan(tap(r), 0.15) * 0.3, t["tap"])
+    place(fx, pan(latch(r), 0.1) * 0.5, t["click"] - 0.07)
+    place(fx, pan(creak(r), 0.25) * 0.2, t["door"])
+    for i, at in enumerate([0.05, 0.3, 0.52, 0.74, 1.05, 1.5]):
+        place(fx, pan(step(r), 0.25 - i * 0.05) * (0.2 if i < 4 else 0.26), t["out"] + at)
+    for k0, d in ((t["offer"], 0.45), (t["reach"], 0.5), (t["take"], 0.4), (t["swap"], 0.5)):
+        place(fx, pan(bag(r, d), -0.05) * 0.3, k0)
+    place(fx, pan(bag(r, 1.6, 60), -0.1) * 0.16, t["laugh"])
+    place(fx, pan(crunch(r), 0.12) * 0.35, t["bite"])
+    for i in range(4):
+        place(fx, pan(step(r), -0.1 + 0.2 * (i % 2)) * 0.18, t["walk_a"] + 0.1 + i * 0.24)
+    for i in range(6):
+        place(fx, pan(rustle(r, 0.22), 0.15) * 0.22, t["tie"] + 0.2 + i * 0.52)    # the lace
+    for i in range(3):
+        place(fx, pan(rustle(r, 0.3), -0.1) * 0.12, t["s5b"] + 0.6 + i * 1.4)     # her hand on the jacket
+    place(fx, pan(bump(r), 0.0) * 0.55, t["bump"])
+    place(fx, pan(rustle(r, 0.5), 0.0) * 0.3, t["fix"])
+    place(fx, pan(tap(r), 0.1) * 0.3, t["tap2"])
+    place(fx, pan(hiss(r), 0.7) * 0.35, t["doorOpen"])
+    place(fx, pan(street_bed(1.2, r)[0] * np.hanning(ns(1.2)), 0.7) * 0.25, t["doorOpen"])
+    for i in range(2):
+        place(fx, pan(step(r), 0.6) * 0.14, t["doorOpen"] + 0.3 + i * 0.25)
+    # ---- duck the beds under the voices (4 dB), black: only the engine for the last half second
+    env = np.abs(voice).max(0)
+    env = lp(env, 6, 1)
+    on = np.clip(env / (np.percentile(env[env > 1e-4], 70) + 1e-9), 0, 1)
+    beds *= dbg(-4.0 * on)
+    voice[:, ns(t["black"]):] = 0
+    fx[:, ns(t["black"]):] = 0
+    mix = voice + beds + fx
+    finish(mix, PUB / "mix_corto.wav", target=-15.0)
+
+
 if __name__ == "__main__":
     what = sys.argv[1:] or ["nota", "prueba"]
     if "nota" in what:
         build_nota()
     if "prueba" in what:
         build_prueba()
+    if "lips" in what:
+        build_lips()
+    if "corto" in what:
+        build_corto()

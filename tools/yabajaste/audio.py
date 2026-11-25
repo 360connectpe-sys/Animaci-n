@@ -301,10 +301,10 @@ def build_corto():
     # ---- beds: the micro (present) and the corner (memory), crossfaded on the scene changes
     bus = bus_bed(dur, r)
     busg = curve(N, [(0, 0), (0.4, 1), (t["s4a"], 1), (t["s4a"] + 0.5, 0), (t["s6a"] - 0.15, 0), (t["s6a"] + 0.1, 1), (dur, 1)])
-    beds += bus * busg * 0.30
+    beds += bus * busg * 0.085
     street = street_bed(dur, r)
     stg = curve(N, [(0, 0), (t["s4a"], 0), (t["s4a"] + 0.4, 1), (t["s6a"] - 0.1, 1), (t["s6a"] + 0.1, 0), (dur, 0)])
-    beds += street * stg * 0.26
+    beds += street * stg * 0.11
     # ---- effects
     place(fx, pan(rustle(r, 0.6), 0.1) * 0.25, t["phone_out"] - 0.2)
     for i in range(10):
